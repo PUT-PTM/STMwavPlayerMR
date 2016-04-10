@@ -1,0 +1,61 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<history>
+   <processor signature="arm-none-eabi-gcc noversion nomachine -mcpu=cortex-m4 -mthumb -Wall -ffunction-sections -g -O0 -c -DSTM32F407VG -DSTM32F4XX -DUSE_STDPERIPH_DRIVER -D__ASSEMBLY__ -I..\..\..\workspace\STMwavPlayerMR -I..\..\..\workspace\STMwavPlayerMR\cmsis_lib -I..\..\..\workspace\STMwavPlayerMR\cmsis_boot -I..\..\..\workspace -I..\..\..\workspace\STMwavPlayerMR\cmsis_lib\include -I..\..\..\workspace\STMwavPlayerMR\cmsis -I..\..\..">
+      <target file="stm32f4xx_gpio.o" lastModified="1540195f8bd">
+         <source file="..\..\..\cmsis_lib\source\stm32f4xx_gpio.c" lastModified="15401725dee"/>
+      </target>
+      <target file="stm32f4xx_rtc.o" lastModified="15401960291">
+         <source file="..\..\..\cmsis_lib\source\stm32f4xx_rtc.c" lastModified="1540173702d"/>
+      </target>
+      <target file="startup_stm32f4xx.o" lastModified="1540195f2d7">
+         <source file="..\..\..\cmsis_boot\startup\startup_stm32f4xx.c" lastModified="1540171c2f0"/>
+      </target>
+      <target file="system_stm32f4xx.o" lastModified="1540195f9cf">
+         <source file="..\..\..\cmsis_boot\system_stm32f4xx.c" lastModified="154018aef98"/>
+      </target>
+      <target file="misc.o" lastModified="154019600ab">
+         <source file="..\..\..\cmsis_lib\source\misc.c" lastModified="1540176d5c2"/>
+      </target>
+      <target file="stm32f4xx_spi.o" lastModified="1540195ffd0">
+         <source file="..\..\..\cmsis_lib\source\stm32f4xx_spi.c" lastModified="15401721165"/>
+      </target>
+      <target file="stm32f4xx_rcc.o" lastModified="1540195f636">
+         <source file="..\..\..\cmsis_lib\source\stm32f4xx_rcc.c" lastModified="1540171c2d2"/>
+      </target>
+      <target file="fpu.o" lastModified="1540195f39f">
+         <source file="..\..\..\fpu.c" lastModified="141650a5d00"/>
+      </target>
+      <target file="Lista.o" lastModified="1540195fbe4">
+         <source file="..\..\..\Lista.c" lastModified="1535cf2bfb0"/>
+      </target>
+      <target file="delay.o" lastModified="1540195f236">
+         <source file="..\..\..\delay.c" lastModified="14165110420"/>
+      </target>
+      <target file="syscalls.o" lastModified="1540195faf5">
+         <source file="..\..\..\syscalls\syscalls.c" lastModified="1540172dc9c"/>
+      </target>
+      <target file="spi_sd.o" lastModified="15401eaf6ad">
+         <source file="..\..\..\spi_sd.c" lastModified="15401eaeeb8"/>
+      </target>
+      <target file="ff.o" lastModified="1540195fe94">
+         <source file="..\..\..\ff.c" lastModified="135381838f0"/>
+      </target>
+      <target file="main.o" lastModified="15401e5da75">
+         <source file="..\..\..\main.c" lastModified="15401e5d266"/>
+      </target>
+   </processor>
+   <processor signature="arm-none-eabi-gcc noversion nomachine -mcpu=cortex-m4 -mthumb -Wall -ffunction-sections -g -O0 -c -DSTM32F407VG -DSTM32F4XX -DUSE_STDPERIPH_DRIVER -D__ASSEMBLY__ -I..\..\..\workspace\STMwavPlayerMR -I..\..\..\workspace\STMwavPlayerMR\cmsis_boot -I..\..\..\workspace -I..\..\..\workspace\STMwavPlayerMR\cmsis_lib -I..\..\..\workspace\STMwavPlayerMR\cmsis -I..\..\..\workspace\STMwavPlayerMR\cmsis_lib\include -I..\..\..">
+      <target file="stm32f4xx_tim.o" lastModified="154018b0c22">
+         <source file="..\..\..\cmsis_lib\source\stm32f4xx_tim.c" lastModified="1540175b676"/>
+      </target>
+      <target file="stm32f4xx_dma.o" lastModified="154018b02ed">
+         <source file="..\..\..\cmsis_lib\source\stm32f4xx_dma.c" lastModified="15401753ed1"/>
+      </target>
+      <target file="stm32f4xx_dac.o" lastModified="154018af93e">
+         <source file="..\..\..\cmsis_lib\source\stm32f4xx_dac.c" lastModified="154017632f1"/>
+      </target>
+      <target file="stm32f4xx_i2c.o" lastModified="154018b061e">
+         <source file="..\..\..\cmsis_lib\source\stm32f4xx_i2c.c" lastModified="1540174d1da"/>
+      </target>
+   </processor>
+</history>
