@@ -24,10 +24,16 @@ void EXTI1_IRQHandler(void)
 FIL plik;
 play_wav(struct Lista *utwor, FRESULT fresult)
 {
-	fresult = f_open( &plik, utwor->plik.fname, FA_READ );
+	struct Lista *utwor_tymczasowy=utwor;
+	WORD bajty_wczytane=0;
+	u8 bufor_na_offset[44];		//pomijane dane z pliku .Wav
+	fresult = f_open( &plik, utwor_tymczasowy->plik.fname, FA_READ );
 	if( fresult == FR_OK )
-	    {
-	    	GPIO_ToggleBits(GPIOD, GPIO_Pin_13);
+	{
+		GPIO_ToggleBits(GPIOD, GPIO_Pin_13);
+		//opuszczamy nag³ówek pliku wav - 44 bajty
+		fresult = f_read (&plik, &bufor_na_offset[0], 44, &bajty_wczytane);
+	    fresult = f_close( &plik );
 	    }
 
 }
@@ -130,7 +136,7 @@ int main( void )
         }
         last->next=first;
         GPIO_SetBits(GPIOD, GPIO_Pin_14);
-       volatile int i=0;
+
     for(;;)
     {
     	play_wav(first, fresult);
