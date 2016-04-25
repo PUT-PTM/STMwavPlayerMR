@@ -1,7 +1,6 @@
 #include "stm32f4xx.h"
 #include "system_stm32f4xx.h"
 #include "delay.h"
-#include "spi_sd.h"
 #include "ff.h"
 #include "Lista.h"
 #include "stm32f4xx_conf.h"
@@ -311,10 +310,10 @@ int main( void )
 	        }
 	        last->next=first;
 	        GPIO_SetBits(GPIOD, GPIO_Pin_14);
-
-	    for(;;)
+	        Codec_VolumeCtrl(128);			//ustawienie glosnosci, do ulepszenia, od 0 - 255
+	        MY_DMA_initM2P();
+	        for(;;)
 	    {
-	    	MY_DMA_initM2P();
 	    	play_wav(first, fresult);
 	    	first=first->next;
 	    }

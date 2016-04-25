@@ -5,7 +5,7 @@
 //*************************************
 
 #include "codec.h"
-
+__IO uint32_t  CODECTimeout = CODEC_LONG_TIMEOUT;
 void codec_init()
 {
 	GPIO_InitTypeDef PinInitStruct;
@@ -258,4 +258,104 @@ uint8_t read_codec_register(uint8_t mapbyte)
 	I2C_GenerateSTOP(CODEC_I2C, ENABLE);
 
 	return receivedByte;
+}
+void Codec_VolumeCtrl(uint8_t Volume)
+{
+
+  if (Volume > 0xE6)
+  {
+    /* Set the Master volume */
+    Codec_WriteRegister(0x20, Volume - 0xE7);
+    Codec_WriteRegister(0x21, Volume - 0xE7);
+  }
+  else
+  {
+    /* Set the Master volume */
+    Codec_WriteRegister(0x20, Volume + 0x19);
+    Codec_WriteRegister(0x21, Volume + 0x19);
+  }
+}
+
+/**
+  * @brief Writes a Byte to a given register into the audio codec through the
+           control interface (I2C)
+  * @param RegisterAddr: The address (location) of the register to be written.
+  * @param RegisterValue: the Byte value to be written into destination register.
+  * @retval o if correct communication, else wrong communication
+  */
+void Codec_WriteRegister(uint32_t RegisterAddr, uint32_t RegisterValue)
+{
+  uint32_t result = 0;
+
+  /*!< While the bus is busy */
+  CODECTimeout = CODEC_LONG_TIMEOUT;
+  while(I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_BUSY))
+  {
+    if((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+  }
+
+  /* Start the config sequence */
+  I2C_GenerateSTART(CODEC_I2C, ENABLE);
+
+  /* Test on EV5 and clear it */
+  CODECTimeout = CODEC_FLAG_TIMEOUT;
+  while (!I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_MODE_SELECT))
+  {
+    if((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+  }
+
+  /* Transmit the slave address and enable writing operation */
+  I2C_Send7bitAddress(CODEC_I2C, CODEC_I2C_ADDRESS, I2C_Direction_Transmitter);
+
+  /* Test on EV6 and clear it */
+  CODECTimeout = CODEC_FLAG_TIMEOUT;
+  while (!I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED))
+  {
+    if((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+  }
+
+  /* Transmit the first address for write operation */
+  I2C_SendData(CODEC_I2C, RegisterAddr);
+
+  /* Test on EV8 and clear it */
+  CODECTimeout = CODEC_FLAG_TIMEOUT;
+  while (!I2C_CheckEvent(CODEC_I2C, I2C_EVENT_MASTER_BYTE_TRANSMITTING))
+  {
+    if((CODECTimeout--) == 0) return Codec_TIMEOUT_UserCallback();
+  }
+
+  /* Disable the interrupts mechanism to prevent the I2C communication from corruption */
+  __disable_irq();
+
+  /* Prepare the register value to be sent */
+  I2C_SendData(CODEC_I2C, RegisterValue);
+
+  /*!< Wait till all data have been physically transferred on the bus */
+  CODECTimeout = CODEC_LONG_TIMEOUT;
+  while(!I2C_GetFlagStatus(CODEC_I2C, I2C_FLAG_BTF))
+  {
+    if((CODECTimeout--) == 0) Codec_TIMEOUT_UserCallback();
+  }
+
+  /* End the configuration sequence */
+  I2C_GenerateSTOP(CODEC_I2C, ENABLE);
+
+#ifdef VERIFY_WRITTENDATA
+  /* Verify that the data has been correctly written */
+  result = (Codec_ReadRegister(RegisterAddr) == RegisterValue)? 0:1;
+#endif /* VERIFY_WRITTENDATA */
+
+  /* Re-enable the interrupt mechanism */
+  __enable_irq();
+
+  /* Return the verifying value: 0 (Passed) or 1 (Failed) */
+  return result;
+}
+
+void Codec_TIMEOUT_UserCallback(void)
+{
+  /* Block communication and all processes */
+  while (1)
+  {
+  }
 }

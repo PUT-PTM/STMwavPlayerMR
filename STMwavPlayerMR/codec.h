@@ -72,7 +72,9 @@
 #define CODEC_MAP_VP_BATT_LEVEL 0x30
 #define CODEC_MAP_SPEAK_STATUS 0x31
 #define CODEC_MAP_CHARGE_PUMP_FREQ 0x34
-
+//do sterowania glosnoscia
+#define CODEC_FLAG_TIMEOUT ((uint32_t)0x1000)
+#define CODEC_LONG_TIMEOUT ((uint32_t)(300 * CODEC_FLAG_TIMEOUT))
 //function prototypes
 void codec_init();
 void codec_ctrl_init();
