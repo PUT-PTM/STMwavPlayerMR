@@ -12,6 +12,7 @@
 #include "stm32f4xx_syscfg.h"
 #include "codec.h"
 #include "stm32f4xx_tim.h"
+#include "stm32f4xx_dma.h"
 
 FATFS fatfs;
 FIL plik;
@@ -177,127 +178,146 @@ void INTERRUPT_init(){
 
 	    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
 }
+void MY_DMA_initM2P() {
+	DMA_InitTypeDef  DMA_InitStructure;
+		RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
+		DMA_DeInit(DMA1_Stream5);
+		DMA_InitStructure.DMA_Channel = DMA_Channel_0; 							// wybór kana³u DMA
+		DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;					// ustalenie rodzaju transferu (memory2memory / peripheral2memory /memory2peripheral)
+		DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;							// tryb pracy - pojedynczy transfer b¹dŸ powtarzany
+		DMA_InitStructure.DMA_Priority = DMA_Priority_High;						// ustalenie priorytetu danego kana³u DMA
+		DMA_InitStructure.DMA_BufferSize = 512;									// liczba danych do przes³ania
+		DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&probka_buffer;		// adres Ÿród³owy
+		DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(SPI3->DR));		// adres docelowy
+		DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;					// zezwolenie na inkrementacje adresu po ka¿dej przes³anej paczce danych
+		DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+		DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
+		DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;			// ustalenie rozmiaru przesy³anych danyc
+		DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;		// ustalenie trybu pracy - jednorazwe przes³anie danych
+		DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
+		DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;					// wy³¹czenie kolejki FIFO (nie u¿ywana w tym przykadzie
+		DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
 
+		DMA_Init(DMA1_Stream5, &DMA_InitStructure); // zapisanie wype³nionej struktury do rejestrów wybranego po³¹czenia DMA
+		DMA_Cmd(DMA1_Stream5, ENABLE);				// uruchomienie odpowiedniego po³¹czenia DMA
+
+		SPI_I2S_DMACmd(SPI3,SPI_I2S_DMAReq_Tx,ENABLE);
+		SPI_Cmd(SPI3,ENABLE);
+}
 play_wav(struct Lista *utwor, FRESULT fresult)
 {
-	struct Lista *utwor_tymczasowy=utwor;
-	WORD bajty_wczytane=0;
-	u8 bufor_na_offset[44];		//pomijane dane z pliku .Wav
+	struct Lista *utwor_tymczasowy=utwor;		//pomocniczo, by nie dzialac na oryginale
+	UINT ile_bajtow;							//uzyta w f_read
 	fresult = f_open( &plik, utwor_tymczasowy->plik.fname, FA_READ );
 	if( fresult == FR_OK )
 	{
-		GPIO_ToggleBits(GPIOD, GPIO_Pin_13);
-		//opuszczamy nag³ówek pliku wav - 44 bajty
-		fresult = f_read (&plik, &bufor_na_offset[0], 44, &bajty_wczytane);
-	    fresult = f_close( &plik );
-	    }
+		GPIO_ToggleBits(GPIOD, GPIO_Pin_13); 	//d.pomaranczowa
+		fresult=f_lseek(&plik,44);				//pominiecie 44 B nag³owka pliku .wav
+		volatile ITStatus it_st;  				//sprawdza flage DMA
+		change_song=0;
+		TIM_Cmd(TIM3, ENABLE);
+		while(1)
+		{
+			it_st = RESET;
+			while(it_st == RESET)
+			{
+				it_st = DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG_HTIF5);
+			}
+		 f_read (&plik,&probka_buffer[0],256*4,&ile_bajtow);
+		 DMA_ClearFlag(DMA1_Stream5, DMA_FLAG_HTIF5);
+	     if(ile_bajtow<256*4||change_song==1)break;
 
+	     it_st = RESET;
+		 while(it_st == RESET)
+		   	 {
+		   		 it_st = DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG_TCIF5);
+		   	 }
+		 f_read (&plik,&probka_buffer[256],256*4,&ile_bajtow);
+		 DMA_ClearFlag(DMA1_Stream5, DMA_FLAG_TCIF5 );
+		 if(ile_bajtow<256*4||change_song==1)break;
+		}
+		stan=0;
+		TIM_Cmd(TIM3, DISABLE);
+		fresult = f_close (&plik);
+	 }
 }
 
 int main( void )
 {
-    SystemInit();
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD, ENABLE);
-    RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
+	SystemInit();
 
-    //*********************************************************************
-    //							DIODES
-    //*********************************************************************
-    GPIO_InitTypeDef  DIODES;
-    /* Configure PD12, PD13, PD14 and PD15 in output pushpull mode */
-    DIODES.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15;
-    DIODES.GPIO_Mode = GPIO_Mode_OUT; 		//tryb wyprowadzenia, wyjcie binarne
-    DIODES.GPIO_OType = GPIO_OType_PP; 		//wyjcie komplementarne
-    DIODES.GPIO_Speed = GPIO_Speed_100MHz;	//max. V prze³¹czania wyprowadzeñ
-    DIODES.GPIO_PuPd = GPIO_PuPd_NOPULL;	//brak podci¹gania wyprowadzenia
-    GPIO_Init(GPIOD, &DIODES);
+	    DIODES_init();		//inicjacja diod
 
-    delay_init( 80 );	//wys³anie 80 impulsow zegarowych; do inicjalizacji SPI
-    SPI_SD_Init();		//inicjalizacja SPI pod SD
+	    delay_init( 80 );	//wys³anie 80 impulsow zegarowych; do inicjalizacji SPI
+	    SPI_SD_Init();		//inicjalizacja SPI pod SD
 
-    //*********************************************************************
-    //							SysTick
-    //SysTick_CLK... >> taktowany z f = 72MHz/8 = 9MHz
-    //Systick_Config >> generuje przerwanie co 10ms
-    //*********************************************************************
-    SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);	//zegar 24-bitowy
-    SysTick_Config(90000);
+	    //*********************************************************************
+	    //							SysTick
+	    //SysTick_CLK... >> taktowany z f = 72MHz/8 = 9MHz
+	    //Systick_Config >> generuje przerwanie co 10ms
+	    //*********************************************************************
+	    SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);	//zegar 24-bitowy
+	    SysTick_Config(90000);
 
-    //*** BUTTON ***
-    GPIO_InitTypeDef  USER_BUTTON;
-    USER_BUTTON.GPIO_Pin = GPIO_Pin_0;
-    USER_BUTTON.GPIO_Mode = GPIO_Mode_IN;
-    USER_BUTTON.GPIO_PuPd = GPIO_PuPd_NOPULL;
-    GPIO_Init(GPIOA, &USER_BUTTON);
+	    BUTTON_init();
+	    JOINT_VIBRATION();
+	    INTERRUPT_init();
+	    DIODES_INTERRUPT();
+	    //*********************************************************************
+	    //  						SD CARD
+	    //*********************************************************************
+	    FRESULT fresult;
+	    DIR Dir;
+	    FILINFO plikInfo;
 
-    //KONFIGURACJA KONTROLERA PRZERWAÑ
-    NVIC_InitTypeDef NVIC_InitStructure;
-    NVIC_InitStructure.NVIC_IRQChannel = EXTI1_IRQn; // numer przerwania
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00; // priorytet g³ówny
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00; // subpriorytet
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; // uruchom dany kana³
-    NVIC_Init(&NVIC_InitStructure); // zapisz wype³nion¹ strukturê do rejestrów
+	    codec_init();
+	    codec_ctrl_init();
 
-    EXTI_InitTypeDef EXTI_InitStructure;
-    EXTI_InitStructure.EXTI_Line = EXTI_Line1; // wybór numeru aktualnie konfigurowanej linii przerwañ
-    EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt; // wybór trybu - przerwanie b¹dŸ zdarzenie
-    EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising; // wybór zbocza, na które zareaguje przerwanie
-    EXTI_InitStructure.EXTI_LineCmd = ENABLE; // uruchom dan¹ liniê przerwañ
-    EXTI_Init(&EXTI_InitStructure); // zapisz strukturê konfiguracyjn¹ przerwañ zewnêtrznych do rejestrów
+	    I2S_Cmd(CODEC_I2S, ENABLE); 		//Integrated Interchip Sound to connect digital devices
 
-    SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
+	    struct Lista *first=0,*last=0;
+	    int czy_pierwszy_elem=-1;
 
-    //*********************************************************************
-    //  						SD CARD
-    //*********************************************************************
-    FRESULT fresult;
+	    disk_initialize(0);				 	//inicjalizacja karty
+	    fresult = f_mount( &fatfs, 1,1 );	//zarejestrowanie dysku logicznego w systemie
 
-    DIR Dir;
-    FILINFO plikInfo;
+	    GPIO_SetBits(GPIOD, GPIO_Pin_15);	//zapalenie niebieskiej diody
 
-    struct Lista *first=0,*last=0;
-    int czy_pierwszy_elem=-1;
+	    fresult = f_opendir(&Dir, "\\");
 
-    disk_initialize(0);				 //inicjalizacja karty
-    fresult = f_mount( 0, &fatfs );	 //zarejestrowanie dysku logicznego w systemie
+	      if(fresult != FR_OK)
+	        return(fresult);
 
-    GPIO_SetBits(GPIOD, GPIO_Pin_15);//zapalenie niebieskiej diody
+	        for(;;)
+	        {
+	          fresult = f_readdir(&Dir, &plikInfo);
 
-        fresult = f_opendir(&Dir, "\\");
+	          if(fresult != FR_OK)
+	            return(fresult);
+	          if(!plikInfo.fname[0])
+	            break;
+	          if(czy_pierwszy_elem==-1) 	//pominiecie folderu systemowego znajduj¹cego siê na karcie
+	          {
+	        	  czy_pierwszy_elem=0;
+	          }
+	          else if(czy_pierwszy_elem==0)
+	          {
+	        	  first=last=add_last(last,plikInfo);
+	        	  czy_pierwszy_elem++;
+	          }
+	          else
+	        	  last=add_last(last,plikInfo);
 
-        if(fresult != FR_OK)
-          return(fresult);
+	        }
+	        last->next=first;
+	        GPIO_SetBits(GPIOD, GPIO_Pin_14);
 
-        for(;;)
-        {
-          fresult = f_readdir(&Dir, &plikInfo);
-
-          if(fresult != FR_OK)
-            return(fresult);
-          if(!plikInfo.fname[0])
-            break;
-          if(czy_pierwszy_elem==-1) //pomijam folder systemowy znajduj¹cy siê na karcie
-          {
-        	  czy_pierwszy_elem=0;
-          }
-          else if(czy_pierwszy_elem==0)
-          {
-        	  first=last=add_last(last,plikInfo);
-        	  czy_pierwszy_elem++;
-          }
-          else
-        	  last=add_last(last,plikInfo);
-
-        }
-        last->next=first;
-        GPIO_SetBits(GPIOD, GPIO_Pin_14);
-
-    for(;;)
-    {
-    	play_wav(first, fresult);
-    	first=first->next;
-    }
-
+	    for(;;)
+	    {
+	    	MY_DMA_initM2P();
+	    	play_wav(first, fresult);
+	    	first=first->next;
+	    }
 	return 0;
 }
 

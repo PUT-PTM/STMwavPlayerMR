@@ -4,6 +4,8 @@
 /* Only rcvr_spi(), xmit_spi(), disk_timerproc() and some macros         */
 /* are platform dependent.                                               */
 /*-----------------------------------------------------------------------*/
+
+//najwazniejsze funkcje i procedury do obslugi karty
 #include "stm32f4xx.h"
 #include "diskio.h"
 #include "delay.h"
@@ -201,8 +203,6 @@ int chk_power(void)        /* Socket power state: 0=off, 1=on */
     return PowerFlag;
 }
 
-
-
 /*-----------------------------------------------------------------------*/
 /* Receive a data packet from MMC                                        */
 /*-----------------------------------------------------------------------*/
@@ -230,8 +230,6 @@ bool rcvr_datablock (
 
     return TRUE;                    /* Return with success */
 }
-
-
 
 /*-----------------------------------------------------------------------*/
 /* Send a data packet to MMC                                             */
@@ -278,8 +276,6 @@ bool xmit_datablock (
 }
 #endif /* _READONLY */
 
-
-
 /*-----------------------------------------------------------------------*/
 /* Send a command packet to MMC                                          */
 /*-----------------------------------------------------------------------*/
@@ -314,8 +310,6 @@ BYTE send_cmd (
 
     return res;            /* Return with the response value */
 }
-
-
 
 /*--------------------------------------------------------------------------
 
@@ -380,8 +374,6 @@ DSTATUS disk_initialize (
     return Stat;
 }
 
-
-
 /*-----------------------------------------------------------------------*/
 /* Get Disk Status                                                       */
 /*-----------------------------------------------------------------------*/
@@ -393,8 +385,6 @@ DSTATUS disk_status (
     if (drv) return STA_NOINIT;        /* Supports only single drive */
     return Stat;
 }
-
-
 
 /*-----------------------------------------------------------------------*/
 /* Read Sector(s)                                                        */
@@ -434,8 +424,6 @@ DRESULT disk_read (
 
     return count ? RES_ERROR : RES_OK;
 }
-
-
 
 /*-----------------------------------------------------------------------*/
 /* Write Sector(s)                                                       */
