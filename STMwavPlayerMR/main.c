@@ -2,7 +2,7 @@
 #include "system_stm32f4xx.h"
 #include "delay.h"
 #include "ff.h"
-#include "Lista.h"
+#include "List.h"
 #include "stm32f4xx_conf.h"
 #include "stm32f4xx_rcc.h"
 #include "stm32f4xx_gpio.h"
@@ -15,16 +15,16 @@
 #include <stdbool.h>
 
 FATFS fatfs;
-FIL plik;
-u32 probka_buffer[512];
-volatile int stan=0;
+FIL file;
+u32 sample_buffer[512];
+volatile int diode_state=0;
 volatile int change_song=0;
 
 void TIM3_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
 	{
-		po_kolei();
+		spin_diodes();
 		// wyzerowanie flagi wyzwolonego przerwania
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 	}
@@ -42,7 +42,7 @@ void TIM5_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM5, TIM_IT_Update) != RESET)
 	{
-		//miejsce na kod wywo³ywany w momencie wyst¹pienia przerwania
+		//miejsce na kod wywolywany w momencie wystapienia przerwania
 		//drgania stykow+zmiana piosenki
 		change_song=1;//1 - wcisnieto przycisk, by zmienic utwor
 		TIM_Cmd(TIM5, DISABLE);
@@ -67,13 +67,13 @@ void JOINT_VIBRATION()
 
 	//KONFIGURACJA PRZERWAÑ - TIMER/COUNTER
 	NVIC_InitTypeDef NVIC_InitStructure3;
-	NVIC_InitStructure3.NVIC_IRQChannel = TIM5_IRQn;				// numer przerwania
-	NVIC_InitStructure3.NVIC_IRQChannelPreemptionPriority = 0x00;	// priorytet g³ówny
-	NVIC_InitStructure3.NVIC_IRQChannelSubPriority = 0x00;			// subpriorytet
-	NVIC_InitStructure3.NVIC_IRQChannelCmd = ENABLE;				// uruchom dany kana³
-	NVIC_Init(&NVIC_InitStructure3);								// zapisz wype³nion¹ strukturê do rejestrów
-	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);						// wyczyszczenie przerwania od timera 3 (wyst¹pi³o przy konfiguracji timera)
-	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);						// zezwolenie na przerwania od przepe³nienia dla timera 5
+	NVIC_InitStructure3.NVIC_IRQChannel = TIM5_IRQn;// numer przerwania
+	NVIC_InitStructure3.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet g³ówny
+	NVIC_InitStructure3.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
+	NVIC_InitStructure3.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kana³
+	NVIC_Init(&NVIC_InitStructure3);// zapisz wype³nion¹ strukturê do rejestrów
+	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);// wyczyszczenie przerwania od timera 3 (wyst¹pi³o przy konfiguracji timera)
+	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepe³nienia dla timera 5
 }
 void DIODES_INTERRUPT()
 {
@@ -82,22 +82,22 @@ void DIODES_INTERRUPT()
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
 	//KONFIGURACJA PRZERWAÑ - TIMER/COUNTER
 	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn; 			// numer przerwania
+	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;// numer przerwania
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet g³ówny
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00; 		// subpriorytet
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; 			// uruchom dany kana³
-	NVIC_Init(&NVIC_InitStructure); 							// zapisz wype³nion¹ strukturê do rejestrów
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kana³
+	NVIC_Init(&NVIC_InitStructure);// zapisz wype³nion¹ strukturê do rejestrów
 
 	TIM_TimeBaseInitTypeDef TIMER_3;
-	TIMER_3.TIM_Period = 42000-1;					//okres zliczania nie przekroczyæ 2^16!
-	TIMER_3.TIM_Prescaler = 1000-1;  				//wartosc preskalera, tutaj bardzo ma³a
-	TIMER_3.TIM_ClockDivision = TIM_CKD_DIV1; 		//dzielnik zegara
-	TIMER_3.TIM_CounterMode = TIM_CounterMode_Up; 	//kierunek zliczania
+	TIMER_3.TIM_Period = 42000-1;//okres zliczania nie przekroczyæ 2^16!
+	TIMER_3.TIM_Prescaler = 1000-1;//wartosc preskalera, tutaj bardzo ma³a
+	TIMER_3.TIM_ClockDivision = TIM_CKD_DIV1;//dzielnik zegara
+	TIMER_3.TIM_CounterMode = TIM_CounterMode_Up;//kierunek zliczania
 	TIM_TimeBaseInit(TIM3, &TIMER_3);
 
 	//UWAGA: uruchomienie zegara jest w przerwaniu
-	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);	// wyczyszczenie przerwania od timera 3 (wyst¹pi³o przy konfiguracji timera)
-	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);	// zezwolenie na przerwania od przepe³nienia dla timera 3
+	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);// wyczyszczenie przerwania od timera 3 (wyst¹pi³o przy konfiguracji timera)
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepe³nienia dla timera 3
 }
 void DIODES_init()
 {
@@ -105,34 +105,34 @@ void DIODES_init()
 	GPIO_InitTypeDef  DIODES;
 	/* Configure PD12, PD13, PD14 and PD15 in output pushpull mode */
 	DIODES.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15;
-	DIODES.GPIO_Mode = GPIO_Mode_OUT;		//tryb wyprowadzenia, wyjcie binarne
-	DIODES.GPIO_OType = GPIO_OType_PP;		//wyjcie komplementarne
-	DIODES.GPIO_Speed = GPIO_Speed_100MHz;	//max. V prze³¹czania wyprowadzeñ
-	DIODES.GPIO_PuPd = GPIO_PuPd_NOPULL;	//brak podci¹gania wyprowadzenia
+	DIODES.GPIO_Mode = GPIO_Mode_OUT;//tryb wyprowadzenia, wyjcie binarne
+	DIODES.GPIO_OType = GPIO_OType_PP;//wyjcie komplementarne
+	DIODES.GPIO_Speed = GPIO_Speed_100MHz;//max. V prze³¹czania wyprowadzeñ
+	DIODES.GPIO_PuPd = GPIO_PuPd_NOPULL;//brak podci¹gania wyprowadzenia
 	GPIO_Init(GPIOD, &DIODES);
 }
-void po_kolei()
+void spin_diodes()
 {
 	GPIO_ResetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15);
-	if(stan==3)
+	if(diode_state==3)
 	{
 		GPIO_SetBits(GPIOD, GPIO_Pin_12);
-		stan=0;
+		diode_state=0;
 	}
-	else if(stan==2)
+	else if(diode_state==2)
 	{
 		GPIO_SetBits(GPIOD, GPIO_Pin_13);
-		stan=3;
+		diode_state=3;
 	}
-	else if(stan==1)
+	else if(diode_state==1)
 	{
 		GPIO_SetBits(GPIOD, GPIO_Pin_14);
-		stan=2;
+		diode_state=2;
 	}
-	else if(stan==0)
+	else if(diode_state==0)
 	{
 		GPIO_SetBits(GPIOD, GPIO_Pin_15);
-		stan=1;
+		diode_state=1;
 	}
 }
 void BUTTON_init()
@@ -148,18 +148,18 @@ void INTERRUPT_init()
 {
 	//KONFIGURACJA KONTROLERA PRZERWAÑ
 	NVIC_InitTypeDef NVIC_InitStructure;
-	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn; 			// numer przerwania
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn; // numer przerwania
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet g³ówny
-	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00; 		// subpriorytet
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE; 			// uruchom dany kana³
-	NVIC_Init(&NVIC_InitStructure); 							// zapisz wype³nion¹ strukturê do rejestrów
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kana³
+	NVIC_Init(&NVIC_InitStructure);// zapisz wype³nion¹ strukturê do rejestrów
 
 	EXTI_InitTypeDef EXTI_InitStructure;
-	EXTI_InitStructure.EXTI_Line = EXTI_Line0; 				// wybór numeru aktualnie konfigurowanej linii przerwañ
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt; 	// wybór trybu - przerwanie b¹dŸ zdarzenie
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising; 	// wybór zbocza, na które zareaguje przerwanie
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE; 				// uruchom dan¹ liniê przerwañ
-	EXTI_Init(&EXTI_InitStructure); 						// zapisz strukturê konfiguracyjn¹ przerwañ zewnêtrznych do rejestrów
+	EXTI_InitStructure.EXTI_Line = EXTI_Line0;// wybór numeru aktualnie konfigurowanej linii przerwañ
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;// wybór trybu - przerwanie b¹dŸ zdarzenie
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;// wybór zbocza, na które zareaguje przerwanie
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;// uruchom dan¹ liniê przerwañ
+	EXTI_Init(&EXTI_InitStructure);// zapisz strukturê konfiguracyjn¹ przerwañ zewnêtrznych do rejestrów
 
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
 }
@@ -173,7 +173,7 @@ void MY_DMA_initM2P()
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;							// tryb pracy - pojedynczy transfer b¹dŸ powtarzany
 	DMA_InitStructure.DMA_Priority = DMA_Priority_High;						// ustalenie priorytetu danego kana³u DMA
 	DMA_InitStructure.DMA_BufferSize = 512;									// liczba danych do przes³ania
-	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&probka_buffer;		// adres Ÿród³owy
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&sample_buffer;		// adres Ÿród³owy
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(SPI3->DR));		// adres docelowy
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;					// zezwolenie na inkrementacje adresu po ka¿dej przes³anej paczce danych
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
@@ -190,56 +190,55 @@ void MY_DMA_initM2P()
 	SPI_I2S_DMACmd(SPI3,SPI_I2S_DMAReq_Tx,ENABLE);
 	SPI_Cmd(SPI3,ENABLE);
 }
-bool read_and_send(int pos, volatile ITStatus it_st, UINT ile_bajtow, uint32_t DMA_FLAG)
+bool read_and_send(int position, volatile ITStatus it_status, UINT read_bytes, uint32_t DMA_FLAG)
 {
-	it_st = RESET;
-	while(it_st == RESET)
+	it_status = RESET;
+	while(it_status == RESET)
 	{
-		it_st = DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG);
+		it_status = DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG);
 	}
-	f_read (&plik,&probka_buffer[pos],256*4,&ile_bajtow);
+	f_read (&file,&sample_buffer[position],256*4,&read_bytes);
 	DMA_ClearFlag(DMA1_Stream5, DMA_FLAG);
-	if(ile_bajtow<256*4||change_song==1)
+	if(read_bytes<256*4||change_song==1)
 	{
 		return 0;
 	}
 	return 1;
 }
-void play_wav(struct Lista *utwor, FRESULT fresult)
+void play_wav(struct List *song, FRESULT fresult)
 {
-	struct Lista *utwor_tymczasowy=utwor;		//pomocniczo, by nie dzialac na oryginale
-	UINT ile_bajtow;							//uzyta w f_read
-	fresult = f_open( &plik, utwor_tymczasowy->plik.fname, FA_READ );
+	struct List *temporary_song=song;//pomocniczo, by nie dzialac na oryginale
+	UINT read_bytes;//uzyta w f_read
+	fresult = f_open( &file, temporary_song->file.fname, FA_READ );
 	if( fresult == FR_OK )
 	{
-		GPIO_ToggleBits(GPIOD, GPIO_Pin_13); 	//d.pomaranczowa
-		fresult=f_lseek(&plik,44);				//pominiecie 44 B nag³owka pliku .wav
-		volatile ITStatus it_st;  				//sprawdza flage DMA
+		GPIO_ToggleBits(GPIOD, GPIO_Pin_13);//d.pomaranczowa
+		fresult=f_lseek(&file,44);//pominiecie 44 B nag³owka pliku .wav
+		volatile ITStatus it_status;//sprawdza flage DMA
 		change_song=0;
 		TIM_Cmd(TIM3, ENABLE);
 		while(1)
 		{
-			if (read_and_send(0, it_st, ile_bajtow, DMA_FLAG_HTIF5)==0)
+			if (read_and_send(0, it_status, read_bytes, DMA_FLAG_HTIF5)==0)
 			{
 				break;
 			}
-			if (read_and_send(256, it_st, ile_bajtow, DMA_FLAG_TCIF5)==0)
+			if (read_and_send(256, it_status, read_bytes, DMA_FLAG_TCIF5)==0)
 			{
 				break;
 			}
 		}
-		stan=0;
+		diode_state=0;
 		TIM_Cmd(TIM3, DISABLE);
-		fresult = f_close(&plik);
+		fresult = f_close(&file);
 	}
 }
-
 int main( void )
 {
 	SystemInit();
-	DIODES_init();		//inicjacja diod
-	delay_init( 80 );	//wys³anie 80 impulsow zegarowych; do inicjalizacji SPI
-	SPI_SD_Init();		//inicjalizacja SPI pod SD
+	DIODES_init();//inicjacja diod
+	delay_init( 80 );//wys³anie 80 impulsow zegarowych; do inicjalizacji SPI
+	SPI_SD_Init();//inicjalizacja SPI pod SD
 
 	//*********************************************************************
 	//							SysTick
@@ -258,20 +257,20 @@ int main( void )
 	//*********************************************************************
 	FRESULT fresult;
 	DIR Dir;
-	FILINFO plikInfo;
+	FILINFO fileInfo;
 
 	codec_init();
 	codec_ctrl_init();
 
-	I2S_Cmd(CODEC_I2S, ENABLE); 		//Integrated Interchip Sound to connect digital devices
+	I2S_Cmd(CODEC_I2S, ENABLE);//Integrated Interchip Sound to connect digital devices
 
-	struct Lista *first=0,*last=0;
-	int czy_pierwszy_elem=-1;
+	struct List *first=0,*last=0;
+	int is_the_first_element=-1;
 
-	disk_initialize(0);				 	//inicjalizacja karty
-	fresult = f_mount( &fatfs, 1,1 );	//zarejestrowanie dysku logicznego w systemie
+	disk_initialize(0);//inicjalizacja karty
+	fresult = f_mount( &fatfs, 1,1 );//zarejestrowanie dysku logicznego w systemie
 
-	GPIO_SetBits(GPIOD, GPIO_Pin_15);	//zapalenie niebieskiej diody
+	GPIO_SetBits(GPIOD, GPIO_Pin_15);//zapalenie niebieskiej diody
 
 	fresult = f_opendir(&Dir, "\\");
 
@@ -282,32 +281,32 @@ int main( void )
 
 	for(;;)
 	{
-		fresult = f_readdir(&Dir, &plikInfo);
+		fresult = f_readdir(&Dir, &fileInfo);
 		if(fresult != FR_OK)
 		{
 			return(fresult);
 		}
-		if(!plikInfo.fname[0])
+		if(!fileInfo.fname[0])
 		{
 			break;
 		}
-		if(czy_pierwszy_elem==-1) 	//pominiecie folderu systemowego znajduj¹cego siê na karcie
+		if(is_the_first_element==-1)//pominiecie folderu systemowego znajduj¹cego siê na karcie
 		{
-			czy_pierwszy_elem=0;
+			is_the_first_element=0;
 		}
-		else if(czy_pierwszy_elem==0)
+		else if(is_the_first_element==0)
 		{
-			first=last=add_last(last,plikInfo);
-			czy_pierwszy_elem++;
+			first=last=add_last(last,fileInfo);
+			is_the_first_element++;
 		}
 		else
 		{
-			last=add_last(last,plikInfo);
+			last=add_last(last,fileInfo);
 		}
 	}
 	last->next=first;
 	GPIO_SetBits(GPIOD, GPIO_Pin_14);
-	Codec_VolumeCtrl(138);			//ustawienie glosnosci, do ulepszenia, od 0 - 255
+	Codec_VolumeCtrl(138);//ustawienie glosnosci, do ulepszenia, od 0 - 255
 	MY_DMA_initM2P();
 	for(;;)
 	{
