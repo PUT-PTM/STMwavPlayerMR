@@ -31,7 +31,7 @@ void TIM3_IRQHandler(void)
 }
 void EXTI0_IRQHandler(void)
 {
-	//drgania stykow
+	// drgania stykow
 	if(EXTI_GetITStatus(EXTI_Line0) != RESET)
 	{
 		TIM_Cmd(TIM5, ENABLE);
@@ -42,8 +42,8 @@ void TIM5_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM5, TIM_IT_Update) != RESET)
 	{
-		//miejsce na kod wywolywany w momencie wystapienia przerwania
-		//drgania stykow+zmiana piosenki
+		// miejsce na kod wywolywany w momencie wystapienia przerwania
+		// drgania stykow + zmiana piosenki
 		change_song=1;//1 - wcisnieto przycisk, by zmienic utwor
 		TIM_Cmd(TIM5, DISABLE);
 		TIM_SetCounter(TIM5, 0);
@@ -53,8 +53,8 @@ void TIM5_IRQHandler(void)
 }
 void JOINT_VIBRATION()
 {
-	//TIMER DO ELIMINACJI DRGAN STYKOW
-	//TIM5
+	// TIMER DO ELIMINACJI DRGAN STYKOW
+	// TIM5
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
 	TIM_TimeBaseInitTypeDef TIMER_5;
 	/* Time base configuration */
@@ -65,7 +65,7 @@ void JOINT_VIBRATION()
 	TIM_TimeBaseInit(TIM5, &TIMER_5);
 	TIM_Cmd(TIM5,DISABLE);
 
-	//KONFIGURACJA PRZERWAN - TIMER/COUNTER
+	// KONFIGURACJA PRZERWAN - TIMER/COUNTER
 	NVIC_InitTypeDef NVIC_InitStructure3;
 	NVIC_InitStructure3.NVIC_IRQChannel = TIM5_IRQn;// numer przerwania
 	NVIC_InitStructure3.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet glowny
@@ -80,7 +80,7 @@ void DIODES_INTERRUPT()
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-	//KONFIGURACJA PRZERWAN - TIMER/COUNTER
+	// KONFIGURACJA PRZERWAN - TIMER/COUNTER
 	NVIC_InitTypeDef NVIC_InitStructure;
 	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;// numer przerwania
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet glowny
@@ -89,13 +89,13 @@ void DIODES_INTERRUPT()
 	NVIC_Init(&NVIC_InitStructure);// zapisz wypelniona strukture do rejestrow
 
 	TIM_TimeBaseInitTypeDef TIMER_3;
-	TIMER_3.TIM_Period = 42000-1;//okres zliczania nie przekroczyc 2^16!
-	TIMER_3.TIM_Prescaler = 1000-1;//wartosc preskalera, tutaj bardzo mala
-	TIMER_3.TIM_ClockDivision = TIM_CKD_DIV1;//dzielnik zegara
-	TIMER_3.TIM_CounterMode = TIM_CounterMode_Up;//kierunek zliczania
+	TIMER_3.TIM_Period = 42000-1;// okres zliczania nie przekroczyc 2^16!
+	TIMER_3.TIM_Prescaler = 1000-1;// wartosc preskalera, tutaj bardzo mala
+	TIMER_3.TIM_ClockDivision = TIM_CKD_DIV1;// dzielnik zegara
+	TIMER_3.TIM_CounterMode = TIM_CounterMode_Up;// kierunek zliczania
 	TIM_TimeBaseInit(TIM3, &TIMER_3);
 
-	//UWAGA: uruchomienie zegara jest w przerwaniu
+	// UWAGA: uruchomienie zegara jest w przerwaniu
 	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);// wyczyszczenie przerwania od timera 3 (wystapilo przy konfiguracji timera)
 	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepelnienia dla timera 3
 }
@@ -105,10 +105,10 @@ void DIODES_init()
 	GPIO_InitTypeDef  DIODES;
 	/* Configure PD12, PD13, PD14 and PD15 in output pushpull mode */
 	DIODES.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15;
-	DIODES.GPIO_Mode = GPIO_Mode_OUT;//tryb wyprowadzenia, wyjcie binarne
-	DIODES.GPIO_OType = GPIO_OType_PP;//wyjcie komplementarne
-	DIODES.GPIO_Speed = GPIO_Speed_100MHz;//max. V przelaczania wyprowadzen
-	DIODES.GPIO_PuPd = GPIO_PuPd_NOPULL;//brak podciagania wyprowadzenia
+	DIODES.GPIO_Mode = GPIO_Mode_OUT;// tryb wyprowadzenia, wyjcie binarne
+	DIODES.GPIO_OType = GPIO_OType_PP;// wyjcie komplementarne
+	DIODES.GPIO_Speed = GPIO_Speed_100MHz;// max. V przelaczania wyprowadzen
+	DIODES.GPIO_PuPd = GPIO_PuPd_NOPULL;// brak podciagania wyprowadzenia
 	GPIO_Init(GPIOD, &DIODES);
 }
 void spin_diodes()
@@ -146,7 +146,7 @@ void BUTTON_init()
 }
 void INTERRUPT_init()
 {
-	//KONFIGURACJA KONTROLERA PRZERWAN
+	// KONFIGURACJA KONTROLERA PRZERWAN
 	NVIC_InitTypeDef NVIC_InitStructure;
 	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn; // numer przerwania
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet glowny
@@ -178,7 +178,7 @@ void MY_DMA_initM2P()
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;// zezwolenie na inkrementacje adresu po kazdej przeslanej paczce danych
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;// ustalenie rozmiaru przesylanych danyc
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;// ustalenie rozmiaru przesylanych danych
 	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;// ustalenie trybu pracy - jednorazwe przeslanie danych
 	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
 	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;// wylaczenie kolejki FIFO (nie uzywana w tym przykadzie
@@ -207,14 +207,14 @@ bool read_and_send(int position, volatile ITStatus it_status, UINT read_bytes, u
 }
 void play_wav(struct List *song, FRESULT fresult)
 {
-	struct List *temporary_song=song;//pomocniczo, by nie dzialac na oryginale
-	UINT read_bytes;//uzyta w f_read
+	struct List *temporary_song=song;// pomocniczo, by nie dzialac na oryginale
+	UINT read_bytes;// uzyta w f_read
 	fresult = f_open( &file, temporary_song->file.fname, FA_READ );
 	if( fresult == FR_OK )
 	{
-		GPIO_ToggleBits(GPIOD, GPIO_Pin_13);//d.pomaranczowa
-		fresult=f_lseek(&file,44);//pominiecie 44 B naglowka pliku .wav
-		volatile ITStatus it_status;//sprawdza flage DMA
+		GPIO_ToggleBits(GPIOD, GPIO_Pin_13);
+		fresult=f_lseek(&file,44);// pominiecie 44 B naglowka pliku .wav
+		volatile ITStatus it_status;// sprawdza flage DMA
 		change_song=0;
 		TIM_Cmd(TIM3, ENABLE);
 		while(1)
@@ -236,25 +236,25 @@ void play_wav(struct List *song, FRESULT fresult)
 int main( void )
 {
 	SystemInit();
-	DIODES_init();//inicjacja diod
-	delay_init( 80 );//wyslanie 80 impulsow zegarowych; do inicjalizacji SPI
-	SPI_SD_Init();//inicjalizacja SPI pod SD
+	DIODES_init();// inicjalizacja diod
+	delay_init( 80 );// wyslanie 80 impulsow zegarowych; do inicjalizacji SPI
+	SPI_SD_Init();// inicjalizacja SPI pod SD
 
-	//*********************************************************************
-	//							SysTick
+	//*****************************************************
+	//				SysTick
 	//SysTick_CLK... >> taktowany z f = 72MHz/8 = 9MHz
 	//Systick_Config >> generuje przerwanie co 10ms
-	//*********************************************************************
-	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);	//zegar 24-bitowy
+	//*****************************************************
+	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);// zegar 24-bitowy
 	SysTick_Config(90000);
 
 	BUTTON_init();
 	JOINT_VIBRATION();
 	INTERRUPT_init();
 	DIODES_INTERRUPT();
-	//*********************************************************************
-	//  						SD CARD
-	//*********************************************************************
+	//*****************************************************
+	//  			SD CARD
+	//*****************************************************
 	FRESULT fresult;
 	DIR Dir;
 	FILINFO fileInfo;
@@ -262,23 +262,21 @@ int main( void )
 	codec_init();
 	codec_ctrl_init();
 
-	I2S_Cmd(CODEC_I2S, ENABLE);//Integrated Interchip Sound to connect digital devices
+	I2S_Cmd(CODEC_I2S, ENABLE);// Integrated Interchip Sound to connect digital devices
 
 	struct List *first=0,*last=0;
 	int is_the_first_element=-1;
 
-	disk_initialize(0);//inicjalizacja karty
-	fresult = f_mount( &fatfs, 1,1 );//zarejestrowanie dysku logicznego w systemie
+	disk_initialize(0);// inicjalizacja karty
+	fresult = f_mount( &fatfs, 1,1 );// zarejestrowanie dysku logicznego w systemie
 
-	GPIO_SetBits(GPIOD, GPIO_Pin_15);//zapalenie niebieskiej diody
+	GPIO_SetBits(GPIOD, GPIO_Pin_15);// zapalenie niebieskiej diody
 
 	fresult = f_opendir(&Dir, "\\");
-
 	if(fresult != FR_OK)
 	{
 		return(fresult);
 	}
-
 	for(;;)
 	{
 		fresult = f_readdir(&Dir, &fileInfo);
@@ -290,7 +288,7 @@ int main( void )
 		{
 			break;
 		}
-		if(is_the_first_element==-1)//pominiecie folderu systemowego znajdujacego sie na karcie
+		if(is_the_first_element==-1)// pominiecie folderu systemowego znajdujacego sie na karcie
 		{
 			is_the_first_element=0;
 		}
@@ -306,7 +304,7 @@ int main( void )
 	}
 	last->next=first;
 	GPIO_SetBits(GPIOD, GPIO_Pin_14);
-	Codec_VolumeCtrl(138);//ustawienie glosnosci, do ulepszenia, od 0 - 255
+	Codec_VolumeCtrl(138);// ustawienie glosnosci, do ulepszenia, od 0 - 255
 	MY_DMA_initM2P();
 	for(;;)
 	{
