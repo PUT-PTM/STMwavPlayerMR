@@ -233,6 +233,21 @@ void play_wav(struct List *song, FRESULT fresult)
 		fresult = f_close(&file);
 	}
 }
+bool isWAV(FILINFO fileInfo)
+{
+	int i=0;
+	for (i=0;i<10;i++)
+	{
+		if(fileInfo.fname[i]=='.')
+		{
+			if(fileInfo.fname[i+1]=='W' && fileInfo.fname[i+2]=='A' && fileInfo.fname[i+3]=='V')
+			{
+				return 1;
+			}
+		}
+	}
+	return 0;
+}
 int main( void )
 {
 	SystemInit();
@@ -265,7 +280,7 @@ int main( void )
 	I2S_Cmd(CODEC_I2S, ENABLE);// Integrated Interchip Sound to connect digital devices
 
 	struct List *first=0,*last=0;
-	int is_the_first_element=-1;
+	int is_the_first_element=0;
 
 	disk_initialize(0);// inicjalizacja karty
 	fresult = f_mount( &fatfs, 1,1 );// zarejestrowanie dysku logicznego w systemie
@@ -288,18 +303,17 @@ int main( void )
 		{
 			break;
 		}
-		if(is_the_first_element==-1)// pominiecie folderu systemowego znajdujacego sie na karcie
+		if(isWAV(fileInfo)==1)// sprawdzenie, czy plik na karcie ma rozszerzenie .wav
 		{
-			is_the_first_element=0;
-		}
-		else if(is_the_first_element==0)
-		{
-			first=last=add_last(last,fileInfo);
-			is_the_first_element++;
-		}
-		else
-		{
-			last=add_last(last,fileInfo);
+			if(is_the_first_element==0)
+			{
+				first=last=add_last(last,fileInfo);
+				is_the_first_element++;
+			}
+			else
+			{
+				last=add_last(last,fileInfo);
+			}
 		}
 	}
 	last->next=first;
