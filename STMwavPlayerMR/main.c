@@ -53,7 +53,7 @@ void TIM5_IRQHandler(void)
 }
 void JOINT_VIBRATION()
 {
-	//TIMER DO ELIMINACJI DRGAÑ STYKÓW
+	//TIMER DO ELIMINACJI DRGAN STYKOW
 	//TIM5
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
 	TIM_TimeBaseInitTypeDef TIMER_5;
@@ -65,39 +65,39 @@ void JOINT_VIBRATION()
 	TIM_TimeBaseInit(TIM5, &TIMER_5);
 	TIM_Cmd(TIM5,DISABLE);
 
-	//KONFIGURACJA PRZERWAÑ - TIMER/COUNTER
+	//KONFIGURACJA PRZERWAN - TIMER/COUNTER
 	NVIC_InitTypeDef NVIC_InitStructure3;
 	NVIC_InitStructure3.NVIC_IRQChannel = TIM5_IRQn;// numer przerwania
-	NVIC_InitStructure3.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet g³ówny
+	NVIC_InitStructure3.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet glowny
 	NVIC_InitStructure3.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
-	NVIC_InitStructure3.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kana³
-	NVIC_Init(&NVIC_InitStructure3);// zapisz wype³nion¹ strukturê do rejestrów
-	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);// wyczyszczenie przerwania od timera 3 (wyst¹pi³o przy konfiguracji timera)
-	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepe³nienia dla timera 5
+	NVIC_InitStructure3.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kanal
+	NVIC_Init(&NVIC_InitStructure3);// zapisz wypelniona strukture do rejestrow
+	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);// wyczyszczenie przerwania od timera 3 (wystapilo przy konfiguracji timera)
+	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepelnienia dla timera 5
 }
 void DIODES_INTERRUPT()
 {
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_1);
-	//KONFIGURACJA PRZERWAÑ - TIMER/COUNTER
+	//KONFIGURACJA PRZERWAN - TIMER/COUNTER
 	NVIC_InitTypeDef NVIC_InitStructure;
 	NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;// numer przerwania
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet g³ówny
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet glowny
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kana³
-	NVIC_Init(&NVIC_InitStructure);// zapisz wype³nion¹ strukturê do rejestrów
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kanal
+	NVIC_Init(&NVIC_InitStructure);// zapisz wypelniona strukture do rejestrow
 
 	TIM_TimeBaseInitTypeDef TIMER_3;
-	TIMER_3.TIM_Period = 42000-1;//okres zliczania nie przekroczyæ 2^16!
-	TIMER_3.TIM_Prescaler = 1000-1;//wartosc preskalera, tutaj bardzo ma³a
+	TIMER_3.TIM_Period = 42000-1;//okres zliczania nie przekroczyc 2^16!
+	TIMER_3.TIM_Prescaler = 1000-1;//wartosc preskalera, tutaj bardzo mala
 	TIMER_3.TIM_ClockDivision = TIM_CKD_DIV1;//dzielnik zegara
 	TIMER_3.TIM_CounterMode = TIM_CounterMode_Up;//kierunek zliczania
 	TIM_TimeBaseInit(TIM3, &TIMER_3);
 
 	//UWAGA: uruchomienie zegara jest w przerwaniu
-	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);// wyczyszczenie przerwania od timera 3 (wyst¹pi³o przy konfiguracji timera)
-	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepe³nienia dla timera 3
+	TIM_ClearITPendingBit(TIM3, TIM_IT_Update);// wyczyszczenie przerwania od timera 3 (wystapilo przy konfiguracji timera)
+	TIM_ITConfig(TIM3, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepelnienia dla timera 3
 }
 void DIODES_init()
 {
@@ -107,8 +107,8 @@ void DIODES_init()
 	DIODES.GPIO_Pin = GPIO_Pin_12 | GPIO_Pin_13| GPIO_Pin_14| GPIO_Pin_15;
 	DIODES.GPIO_Mode = GPIO_Mode_OUT;//tryb wyprowadzenia, wyjcie binarne
 	DIODES.GPIO_OType = GPIO_OType_PP;//wyjcie komplementarne
-	DIODES.GPIO_Speed = GPIO_Speed_100MHz;//max. V prze³¹czania wyprowadzeñ
-	DIODES.GPIO_PuPd = GPIO_PuPd_NOPULL;//brak podci¹gania wyprowadzenia
+	DIODES.GPIO_Speed = GPIO_Speed_100MHz;//max. V przelaczania wyprowadzen
+	DIODES.GPIO_PuPd = GPIO_PuPd_NOPULL;//brak podciagania wyprowadzenia
 	GPIO_Init(GPIOD, &DIODES);
 }
 void spin_diodes()
@@ -146,20 +146,20 @@ void BUTTON_init()
 }
 void INTERRUPT_init()
 {
-	//KONFIGURACJA KONTROLERA PRZERWAÑ
+	//KONFIGURACJA KONTROLERA PRZERWAN
 	NVIC_InitTypeDef NVIC_InitStructure;
 	NVIC_InitStructure.NVIC_IRQChannel = EXTI0_IRQn; // numer przerwania
-	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet g³ówny
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet glowny
 	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
-	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kana³
-	NVIC_Init(&NVIC_InitStructure);// zapisz wype³nion¹ strukturê do rejestrów
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kanal
+	NVIC_Init(&NVIC_InitStructure);// zapisz wypelniona strukture do rejestrow
 
 	EXTI_InitTypeDef EXTI_InitStructure;
-	EXTI_InitStructure.EXTI_Line = EXTI_Line0;// wybór numeru aktualnie konfigurowanej linii przerwañ
-	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;// wybór trybu - przerwanie b¹dŸ zdarzenie
-	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;// wybór zbocza, na które zareaguje przerwanie
-	EXTI_InitStructure.EXTI_LineCmd = ENABLE;// uruchom dan¹ liniê przerwañ
-	EXTI_Init(&EXTI_InitStructure);// zapisz strukturê konfiguracyjn¹ przerwañ zewnêtrznych do rejestrów
+	EXTI_InitStructure.EXTI_Line = EXTI_Line0;// wybor numeru aktualnie konfigurowanej linii przerwan
+	EXTI_InitStructure.EXTI_Mode = EXTI_Mode_Interrupt;// wybor trybu - przerwanie badz zdarzenie
+	EXTI_InitStructure.EXTI_Trigger = EXTI_Trigger_Rising;// wybor zbocza, na ktore zareaguje przerwanie
+	EXTI_InitStructure.EXTI_LineCmd = ENABLE;// uruchom dana linie przerwan
+	EXTI_Init(&EXTI_InitStructure);// zapisz strukture konfiguracyjna przerwan zewnetrznych do rejestrow
 
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
 }
@@ -168,24 +168,24 @@ void MY_DMA_initM2P()
 	DMA_InitTypeDef  DMA_InitStructure;
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1, ENABLE);
 	DMA_DeInit(DMA1_Stream5);
-	DMA_InitStructure.DMA_Channel = DMA_Channel_0; 							// wybór kana³u DMA
-	DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;					// ustalenie rodzaju transferu (memory2memory / peripheral2memory /memory2peripheral)
-	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;							// tryb pracy - pojedynczy transfer b¹dŸ powtarzany
-	DMA_InitStructure.DMA_Priority = DMA_Priority_High;						// ustalenie priorytetu danego kana³u DMA
-	DMA_InitStructure.DMA_BufferSize = 512;									// liczba danych do przes³ania
-	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&sample_buffer;		// adres Ÿród³owy
-	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(SPI3->DR));		// adres docelowy
-	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;					// zezwolenie na inkrementacje adresu po ka¿dej przes³anej paczce danych
+	DMA_InitStructure.DMA_Channel = DMA_Channel_0;// wybor kanalu DMA
+	DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;// ustalenie rodzaju transferu (memory2memory / peripheral2memory /memory2peripheral)
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;// tryb pracy - pojedynczy transfer badz powtarzany
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High;// ustalenie priorytetu danego kanalu DMA
+	DMA_InitStructure.DMA_BufferSize = 512;// liczba danych do przeslania
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&sample_buffer;// adres zrodlowy
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(SPI3->DR));// adres docelowy
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;// zezwolenie na inkrementacje adresu po kazdej przeslanej paczce danych
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;			// ustalenie rozmiaru przesy³anych danyc
-	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;		// ustalenie trybu pracy - jednorazwe przes³anie danych
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;// ustalenie rozmiaru przesylanych danyc
+	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;// ustalenie trybu pracy - jednorazwe przeslanie danych
 	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;					// wy³¹czenie kolejki FIFO (nie u¿ywana w tym przykadzie
+	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;// wylaczenie kolejki FIFO (nie uzywana w tym przykadzie
 	DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
 
-	DMA_Init(DMA1_Stream5, &DMA_InitStructure); // zapisanie wype³nionej struktury do rejestrów wybranego po³¹czenia DMA
-	DMA_Cmd(DMA1_Stream5, ENABLE);				// uruchomienie odpowiedniego po³¹czenia DMA
+	DMA_Init(DMA1_Stream5, &DMA_InitStructure);// zapisanie wypelnionej struktury do rejestrow wybranego polaczenia DMA
+	DMA_Cmd(DMA1_Stream5, ENABLE);// uruchomienie odpowiedniego polaczenia DMA
 
 	SPI_I2S_DMACmd(SPI3,SPI_I2S_DMAReq_Tx,ENABLE);
 	SPI_Cmd(SPI3,ENABLE);
@@ -213,7 +213,7 @@ void play_wav(struct List *song, FRESULT fresult)
 	if( fresult == FR_OK )
 	{
 		GPIO_ToggleBits(GPIOD, GPIO_Pin_13);//d.pomaranczowa
-		fresult=f_lseek(&file,44);//pominiecie 44 B nag³owka pliku .wav
+		fresult=f_lseek(&file,44);//pominiecie 44 B naglowka pliku .wav
 		volatile ITStatus it_status;//sprawdza flage DMA
 		change_song=0;
 		TIM_Cmd(TIM3, ENABLE);
@@ -237,7 +237,7 @@ int main( void )
 {
 	SystemInit();
 	DIODES_init();//inicjacja diod
-	delay_init( 80 );//wys³anie 80 impulsow zegarowych; do inicjalizacji SPI
+	delay_init( 80 );//wyslanie 80 impulsow zegarowych; do inicjalizacji SPI
 	SPI_SD_Init();//inicjalizacja SPI pod SD
 
 	//*********************************************************************
@@ -290,7 +290,7 @@ int main( void )
 		{
 			break;
 		}
-		if(is_the_first_element==-1)//pominiecie folderu systemowego znajduj¹cego siê na karcie
+		if(is_the_first_element==-1)//pominiecie folderu systemowego znajdujacego sie na karcie
 		{
 			is_the_first_element=0;
 		}
