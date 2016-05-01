@@ -19,6 +19,7 @@ FIL file;
 u32 sample_buffer[512];
 volatile int diode_state=0;
 volatile int change_song=0;
+volatile int error_state=0;
 
 void TIM3_IRQHandler(void)
 {
@@ -51,6 +52,53 @@ void TIM5_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
 	}
 }
+void TIM4_IRQHandler(void)
+{
+	if(TIM_GetITStatus(TIM4, TIM_IT_Update) != RESET)
+	{
+		if (error_state==1)// jesli uruchomiono program bez karty SD w module, zle podpieto kable
+		{
+			GPIO_ToggleBits(GPIOD, GPIO_Pin_12);
+		}
+		if (error_state==2)// jesli wyjeto karte SD w trakcie odtwarzania plikow
+		{
+			GPIO_ToggleBits(GPIOD, GPIO_Pin_13);
+		}
+		if (error_state==3)// jesli na karcie SD nie ma plikow .wav
+		{
+			GPIO_ToggleBits(GPIOD, GPIO_Pin_14);
+		}
+		if (error_state==4)// niezagospodarowane na obecna chwile
+		{
+			GPIO_ToggleBits(GPIOD, GPIO_Pin_15);
+		}
+		// wyzerowanie flagi wyzwolonego przerwania
+		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
+	}
+}
+void ERROR_TIMER()
+{
+	// TIMER DO OBSLUGI DIOD W PRZYPADKU BLEDU
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
+	TIM_TimeBaseInitTypeDef TIMER_4;
+	/* Time base configuration */
+	TIMER_4.TIM_Period = 24000-1;
+	TIMER_4.TIM_Prescaler = 1000-1;
+	TIMER_4.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIMER_4.TIM_CounterMode = TIM_CounterMode_Up;
+	TIM_TimeBaseInit(TIM4, &TIMER_4);
+	TIM_Cmd(TIM4,DISABLE);
+
+	// KONFIGURACJA PRZERWAN - TIMER/COUNTER
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel = TIM4_IRQn;// numer przerwania
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet glowny
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kanal
+	NVIC_Init(&NVIC_InitStructure);// zapisz wypelniona strukture do rejestrow
+	TIM_ClearITPendingBit(TIM4, TIM_IT_Update);// wyczyszczenie przerwania od timera 4 (wystapilo przy konfiguracji timera)
+	TIM_ITConfig(TIM4, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepelnienia dla timera 4
+}
 void JOINT_VIBRATION()
 {
 	// TIMER DO ELIMINACJI DRGAN STYKOW
@@ -72,7 +120,7 @@ void JOINT_VIBRATION()
 	NVIC_InitStructure3.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
 	NVIC_InitStructure3.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kanal
 	NVIC_Init(&NVIC_InitStructure3);// zapisz wypelniona strukture do rejestrow
-	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);// wyczyszczenie przerwania od timera 3 (wystapilo przy konfiguracji timera)
+	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);// wyczyszczenie przerwania od timera 5 (wystapilo przy konfiguracji timera)
 	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepelnienia dla timera 5
 }
 void DIODES_INTERRUPT()
@@ -190,15 +238,20 @@ void MY_DMA_initM2P()
 	SPI_I2S_DMACmd(SPI3,SPI_I2S_DMAReq_Tx,ENABLE);
 	SPI_Cmd(SPI3,ENABLE);
 }
-bool read_and_send(int position, volatile ITStatus it_status, UINT read_bytes, uint32_t DMA_FLAG)
+bool read_and_send(FRESULT fresult, int position, volatile ITStatus it_status, UINT read_bytes, uint32_t DMA_FLAG)
 {
 	it_status = RESET;
 	while(it_status == RESET)
 	{
 		it_status = DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG);
 	}
-	f_read (&file,&sample_buffer[position],256*4,&read_bytes);
+	fresult = f_read (&file,&sample_buffer[position],256*4,&read_bytes);
 	DMA_ClearFlag(DMA1_Stream5, DMA_FLAG);
+	if(fresult != FR_OK)// jesli wyjeto karte w trakcie odtwarzania plikow
+	{
+		error_state=2;
+		return 0;
+	}
 	if(read_bytes<256*4||change_song==1)
 	{
 		return 0;
@@ -212,18 +265,17 @@ void play_wav(struct List *song, FRESULT fresult)
 	fresult = f_open( &file, temporary_song->file.fname, FA_READ );
 	if( fresult == FR_OK )
 	{
-		GPIO_ToggleBits(GPIOD, GPIO_Pin_13);
 		fresult=f_lseek(&file,44);// pominiecie 44 B naglowka pliku .wav
 		volatile ITStatus it_status;// sprawdza flage DMA
 		change_song=0;
 		TIM_Cmd(TIM3, ENABLE);
 		while(1)
 		{
-			if (read_and_send(0, it_status, read_bytes, DMA_FLAG_HTIF5)==0)
+			if (read_and_send(fresult,0, it_status, read_bytes, DMA_FLAG_HTIF5)==0)
 			{
 				break;
 			}
-			if (read_and_send(256, it_status, read_bytes, DMA_FLAG_TCIF5)==0)
+			if (read_and_send(fresult,256, it_status, read_bytes, DMA_FLAG_TCIF5)==0)
 			{
 				break;
 			}
@@ -267,6 +319,8 @@ int main( void )
 	JOINT_VIBRATION();
 	INTERRUPT_init();
 	DIODES_INTERRUPT();
+	ERROR_TIMER();
+
 	//*****************************************************
 	//  			SD CARD
 	//*****************************************************
@@ -284,9 +338,13 @@ int main( void )
 
 	disk_initialize(0);// inicjalizacja karty
 	fresult = f_mount( &fatfs, 1,1 );// zarejestrowanie dysku logicznego w systemie
-
-	GPIO_SetBits(GPIOD, GPIO_Pin_15);// zapalenie niebieskiej diody
-
+	if(fresult != FR_OK) //jesli wystapil blad tj. wlaczenie STM32 bez karty w module, zle podpiete kable
+	{
+		error_state=1;
+		TIM_Cmd(TIM4, ENABLE);
+		for(;;)
+		{ }
+	}
 	fresult = f_opendir(&Dir, "\\");
 	if(fresult != FR_OK)
 	{
@@ -316,15 +374,29 @@ int main( void )
 			}
 		}
 	}
+	if (first==0)// jesli na karcie nie ma plikow .wav
+	{
+		error_state=3;
+		TIM_Cmd(TIM4, ENABLE);
+		for(;;)
+		{ }
+	}
 	last->next=first;
-	GPIO_SetBits(GPIOD, GPIO_Pin_14);
 	Codec_VolumeCtrl(138);// ustawienie glosnosci, do ulepszenia, od 0 - 255
 	MY_DMA_initM2P();
 	for(;;)
 	{
 		play_wav(first, fresult);
+		if(error_state!=0)
+		{
+			break;
+		}
 		first=first->next;
 	}
+	GPIO_ResetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15|CODEC_RESET_PIN);
+	TIM_Cmd(TIM4, ENABLE);
+	for(;;)
+	{ }
 	return 0;
 }
 
