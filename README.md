@@ -18,7 +18,7 @@ To run the project you should have hardware:
 How to use?
 
 1. Connect STM32F4-DISCOVERY board with SD Card Module in this way:
-   STM32 <---> SD Card Module
+  * STM32 <---> SD Card Module
   * GND  <---> GND
   * 3V   <---> 3V3
   * PB11 <---> CS
