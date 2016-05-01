@@ -6,6 +6,9 @@ struct Lista *add_last(struct Lista *last, FILINFO data)
 	wsk=(struct Lista*)malloc(sizeof(struct Lista));
 	wsk->plik=data;
 	wsk->next=0;
-	if(last!=0) last->next=wsk;
+	if(last!=0)
+	{
+		last->next=wsk;
+	}
 	return wsk;
 }
