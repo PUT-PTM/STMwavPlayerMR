@@ -30,20 +30,13 @@ How to use?
   * PB13 <---> SCK
   * PB14 <---> MISO
   * GND  <---> GND
-
 2. Connect also potentiometer (GND, PA1, VDD).
-
-
 3. Plug your SD Card with .wav files into the module.
 4. Build this project with CooCox CoIDE and Download Code to Flash.
 5. When you notice the fault alarmed by blinking LEDs, you should press RESET button.
 
 ##How to compile
 The only step is download the project and compile it with CooCox CoIDE.
-
-##Future improvements
-- Add volume changing by potentiometer.
-- Fix errors with SD card.
 
 ##Attributions
 - http://elm-chan.org/fsw/ff/00index_e.html
