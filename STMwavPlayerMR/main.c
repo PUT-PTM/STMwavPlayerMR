@@ -1,35 +1,27 @@
 #include "stm32f4xx.h"
 #include "system_stm32f4xx.h"
-#include "delay.h"
-#include "ff.h"
-#include "List.h"
-#include "stm32f4xx_conf.h"
-#include "stm32f4xx_rcc.h"
-#include "stm32f4xx_gpio.h"
-#include "misc.h"
-#include "stm32f4xx_exti.h"
 #include "stm32f4xx_syscfg.h"
-#include "codec.h"
+#include "stm32f4xx_gpio.h"
+#include "stm32f4xx_conf.h"
+#include "stm32f4xx_exti.h"
 #include "stm32f4xx_tim.h"
 #include "stm32f4xx_dma.h"
+#include "stm32f4xx_adc.h"
+#include "stm32f4xx_rcc.h"
+#include "misc.h"
+#include "delay.h"
+#include "codec.h"
+#include "List.h"
+#include "ff.h"
 #include <stdbool.h>
 
 FATFS fatfs;
 FIL file;
 u32 sample_buffer[512];
-volatile int diode_state=0;
-volatile int change_song=0;
-volatile int error_state=0;
-
-void TIM3_IRQHandler(void)
-{
-	if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
-	{
-		spin_diodes();
-		// wyzerowanie flagi wyzwolonego przerwania
-		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
-	}
-}
+volatile u16 result_of_conversion=0;
+volatile u8 diode_state=0;
+volatile u8 change_song=0;
+volatile u8 error_state=0;
 void EXTI0_IRQHandler(void)
 {
 	// drgania stykow
@@ -39,17 +31,22 @@ void EXTI0_IRQHandler(void)
 		EXTI_ClearITPendingBit(EXTI_Line0);
 	}
 }
-void TIM5_IRQHandler(void)
+void TIM2_IRQHandler(void)
 {
-	if(TIM_GetITStatus(TIM5, TIM_IT_Update) != RESET)
+	if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
+		{
+			ADC_conversion();
+			Codec_VolumeCtrl(result_of_conversion);
+			TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+		}
+}
+void TIM3_IRQHandler(void)
+{
+	if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
 	{
-		// miejsce na kod wywolywany w momencie wystapienia przerwania
-		// drgania stykow + zmiana piosenki
-		change_song=1;//1 - wcisnieto przycisk, by zmienic utwor
-		TIM_Cmd(TIM5, DISABLE);
-		TIM_SetCounter(TIM5, 0);
+		spin_diodes();
 		// wyzerowanie flagi wyzwolonego przerwania
-		TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
+		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
 	}
 }
 void TIM4_IRQHandler(void)
@@ -76,7 +73,20 @@ void TIM4_IRQHandler(void)
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 	}
 }
-void ERROR_TIMER()
+void TIM5_IRQHandler(void)
+{
+	if(TIM_GetITStatus(TIM5, TIM_IT_Update) != RESET)
+	{
+		// miejsce na kod wywolywany w momencie wystapienia przerwania
+		// drgania stykow + zmiana piosenki
+		change_song=1;//1 - wcisnieto przycisk, by zmienic utwor
+		TIM_Cmd(TIM5, DISABLE);
+		TIM_SetCounter(TIM5, 0);
+		// wyzerowanie flagi wyzwolonego przerwania
+		TIM_ClearITPendingBit(TIM5, TIM_IT_Update);
+	}
+}
+void ERROR_TIM_4()
 {
 	// TIMER DO OBSLUGI DIOD W PRZYPADKU BLEDU
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM4, ENABLE);
@@ -185,7 +195,6 @@ void spin_diodes()
 }
 void BUTTON_init()
 {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA, ENABLE);
 	GPIO_InitTypeDef USER_BUTTON;
 	USER_BUTTON.GPIO_Pin = GPIO_Pin_0;
 	USER_BUTTON.GPIO_Mode = GPIO_Mode_IN;
@@ -237,6 +246,83 @@ void MY_DMA_initM2P()
 
 	SPI_I2S_DMACmd(SPI3,SPI_I2S_DMAReq_Tx,ENABLE);
 	SPI_Cmd(SPI3,ENABLE);
+}
+void ADC_conversion()
+{
+	//Odczyt wartosci przez odpytnie flagi zakonczenia konwersji
+	//Wielorazowe sprawdzenie wartoci wyniku konwersji
+	ADC_SoftwareStartConv(ADC1);
+	while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
+	result_of_conversion = ((ADC_GetConversionValue(ADC1)+1)/16)-1;
+	if (result_of_conversion<0)
+	{
+		result_of_conversion=0;
+	}
+}
+void TIM2_ADC_init()
+{
+	//Wejscie do przerwania od TIM2 co 0.05 s
+	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
+	// 2. UTWORZENIE STRUKTURY KONFIGURACYJNEJ
+	TIM_TimeBaseInitTypeDef TIMER_2;
+	TIMER_2.TIM_Period = 2100-1; //okres zliczania nie przekroczyc 2^16!
+	TIMER_2.TIM_Prescaler = 2000-1;  //wartosc preskalera, tutaj bardzo mala
+	TIMER_2.TIM_ClockDivision = TIM_CKD_DIV1; //dzielnik zegara
+	TIMER_2.TIM_CounterMode = TIM_CounterMode_Up; //kierunek zliczania
+	TIM_TimeBaseInit(TIM2, &TIMER_2);
+	TIM_Cmd(TIM2, ENABLE);	//Uruchomienie Timera
+
+	// KONFIGURACJA PRZERWAN - TIMER/COUNTER
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel = TIM2_IRQn;// numer przerwania
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet glowny
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kanal
+	NVIC_Init(&NVIC_InitStructure);// zapisz wypelniona strukture do rejestrow
+	TIM_ClearITPendingBit(TIM2, TIM_IT_Update);// wyczyszczenie przerwania od timera 2 (wystapilo przy konfiguracji timera)
+	TIM_ITConfig(TIM2, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepelnienia dla timera 2
+}
+void ADC_init()
+{
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA , ENABLE);//zegar dla portu GPIO z ktorego wykorzystany zostanie pin
+	//jako wejscie ADC (PA1)
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);//zegar dla modulu ADC1
+
+	//inicjalizacja wejscia ADC
+	GPIO_InitTypeDef  GPIO_InitStructureADC;
+	GPIO_InitStructureADC.GPIO_Pin = GPIO_Pin_1;
+	GPIO_InitStructureADC.GPIO_Mode = GPIO_Mode_AN;
+	GPIO_InitStructureADC.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOA, &GPIO_InitStructureADC);
+
+	ADC_CommonInitTypeDef ADC_CommonInitStructure;//Konfiguracja dla wszystkich ukladow ADC
+	ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;// niezalezny tryb pracy przetwornikow
+	ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div2;// zegar glowny podzielony przez 2
+	ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;// opcja istotna tylko dla tryby multi ADC
+	ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;// czas przerwy pomiedzy kolejnymi konwersjami
+	ADC_CommonInit(&ADC_CommonInitStructure);
+
+	ADC_InitTypeDef ADC_InitStructure;//Konfiguracja danego przetwornika
+	ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;//ustawienie rozdzielczosci przetwornika na maksymalna (12 bitow)
+	//wylaczenie trybu skanowania (odczytywac bedziemy jedno wejscie ADC
+	//w trybie skanowania automatycznie wykonywana jest konwersja na wielu
+	//wejsciach/kanalach)
+	ADC_InitStructure.ADC_ScanConvMode = DISABLE;
+	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;//wlaczenie ciaglego trybu pracy wylaczenie zewnetrznego wyzwalania
+	//konwersja moze byc wyzwalana timerem, stanem wejscia itd. (szczegoly w dokumentacji)
+	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC1;
+	ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
+	//wartosc binarna wyniku bedzie podawana z wyrownaniem do prawej
+	//funkcja do odczytu stanu przetwornika ADC zwraca wartosc 16-bitowa
+	//dla przykladu, wartosc 0xFF wyrownana w prawo to 0x00FF, w lewo 0x0FF0
+	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
+	ADC_InitStructure.ADC_NbrOfConversion = 1;//liczba konwersji rowna 1, bo 1 kanal
+	ADC_Init(ADC1, &ADC_InitStructure);// zapisz wypelniona strukture do rejestrow przetwornika numer 1
+
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_84Cycles);//Konfiguracja kanalu pierwszego ADC
+	ADC_Cmd(ADC1, ENABLE);//Uruchomienie przetwornika ADC
+
+	TIM2_ADC_init();
 }
 bool read_and_send(FRESULT fresult, int position, volatile ITStatus it_status, UINT read_bytes, uint32_t DMA_FLAG)
 {
@@ -304,14 +390,12 @@ int main( void )
 {
 	SystemInit();
 	DIODES_init();// inicjalizacja diod
+	ADC_init();
 	delay_init( 80 );// wyslanie 80 impulsow zegarowych; do inicjalizacji SPI
 	SPI_SD_Init();// inicjalizacja SPI pod SD
 
-	//*****************************************************
-	//				SysTick
 	//SysTick_CLK... >> taktowany z f = 72MHz/8 = 9MHz
 	//Systick_Config >> generuje przerwanie co 10ms
-	//*****************************************************
 	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);// zegar 24-bitowy
 	SysTick_Config(90000);
 
@@ -319,11 +403,9 @@ int main( void )
 	JOINT_VIBRATION();
 	INTERRUPT_init();
 	DIODES_INTERRUPT();
-	ERROR_TIMER();
+	ERROR_TIM_4();
 
-	//*****************************************************
-	//  			SD CARD
-	//*****************************************************
+	//SD CARD
 	FRESULT fresult;
 	DIR Dir;
 	FILINFO fileInfo;
@@ -334,7 +416,7 @@ int main( void )
 	I2S_Cmd(CODEC_I2S, ENABLE);// Integrated Interchip Sound to connect digital devices
 
 	struct List *first=0,*last=0;
-	int is_the_first_element=0;
+	bool is_the_first_element=0;
 
 	disk_initialize(0);// inicjalizacja karty
 	fresult = f_mount( &fatfs, 1,1 );// zarejestrowanie dysku logicznego w systemie
@@ -382,7 +464,6 @@ int main( void )
 		{ }
 	}
 	last->next=first;
-	Codec_VolumeCtrl(138);// ustawienie glosnosci, do ulepszenia, od 0 - 255
 	MY_DMA_initM2P();
 	for(;;)
 	{
@@ -394,12 +475,12 @@ int main( void )
 		first=first->next;
 	}
 	GPIO_ResetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15|CODEC_RESET_PIN);
+	TIM_Cmd(TIM2,DISABLE);
 	TIM_Cmd(TIM4, ENABLE);
 	for(;;)
 	{ }
 	return 0;
 }
-
 void SysTick_Handler()
 {
 	disk_timerproc();
