@@ -253,11 +253,7 @@ void ADC_conversion()
 	//Wielorazowe sprawdzenie wartoci wyniku konwersji
 	ADC_SoftwareStartConv(ADC1);
 	while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
-	result_of_conversion = ((ADC_GetConversionValue(ADC1)+1)/16)-1;
-	if (result_of_conversion<0)
-	{
-		result_of_conversion=0;
-	}
+	result_of_conversion = ((ADC_GetConversionValue(ADC1))/16);
 }
 void TIM2_ADC_init()
 {
