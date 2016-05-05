@@ -4,7 +4,10 @@
 The project of simple .wav player based on STM32f4-DISCOVERY board. It plays .wav files from SD card.
 
 ##Description
-The idea to play .wav files was implement the cyclic list. It contains information about files. You couldn't know the "name" of file, you only need to use the button to switch into next music file. We use SPI for sending data from SD card to STM32F4 because SD card module doesn't support SDIO communication. It uses DMA module for smoother playback of music. To control the volume of songs we use the potentiometer.
+The idea to play .wav files was implement the cyclic list. It contains information about files. You couldn't know the "name" of file, you only need to use the button to switch into next music file. We use SPI for sending data from SD card to STM32F4 because SD card module doesn't support SDIO communication. It uses DMA module for smoother playback of music. To control the volume of songs we use the potentiometer. What is more, the simple error handling was implemented. When you spot blinking:
+* green LED - cable fault, SD Card isn't inserted into SD Card Module or SD Card isn't formatted to FAT32,
+* orange LED - SD Card has been removed during listening music,
+* red LED - SD Card doesn't include .wav files.
 
 ##Tools
 - CooCox CoIDE, Version: 1.7.8
@@ -12,8 +15,9 @@ The idea to play .wav files was implement the cyclic list. It contains informati
 ##How to run
 To run the project you should have hardware:
 - STM32f4-DISCOVERY board,
-- SD Card Module and SD Card formatted to fat32,
-- Headphone or loudspeaker with male jack connector.
+- SD Card Module and SD Card formatted to FAT32,
+- Headphone or loudspeaker with male jack connector,
+- Rotary potentiometer - linear (10k ohm).
 
 How to use?
 
@@ -26,9 +30,13 @@ How to use?
   * PB13 <---> SCK
   * PB14 <---> MISO
   * GND  <---> GND
-  
-2. Plug your SD car with .wav files into the module.
-3. Build this project with CooCox CoIDE and Download Code to Flash.
+
+2. Connect also potentiometer (GND, PA1, VDD).
+
+
+3. Plug your SD Card with .wav files into the module.
+4. Build this project with CooCox CoIDE and Download Code to Flash.
+5. When you notice the fault alarmed by blinking LEDs, you should press RESET button.
 
 ##How to compile
 The only step is download the project and compile it with CooCox CoIDE.
@@ -45,6 +53,7 @@ The only step is download the project and compile it with CooCox CoIDE.
 - https://www.youtube.com/watch?v=EYs3f4uwYTo
 
 ##License
+MIT
 
 ##Credits
 * Monika Grądzka
