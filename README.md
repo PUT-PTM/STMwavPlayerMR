@@ -33,7 +33,7 @@ How to use?
 2. Connect also potentiometer (GND, PA1, VDD).
 3. Plug your SD Card with .wav files into the module.
 4. Build this project with CooCox CoIDE and Download Code to Flash.
-5. When you notice the fault alarmed by blinking LEDs, you should press RESET button.
+5. When you notice the fault alarmed by blinking LEDs, you should fix it and press RESET button.
 
 ##How to compile
 The only step is download the project and compile it with CooCox CoIDE.
