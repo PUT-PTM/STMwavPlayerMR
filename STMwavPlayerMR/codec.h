@@ -15,7 +15,7 @@
 
 #define ALTFUNCSTATUS 	3  //11
 
-//pins to codec
+// pins to codec
 #define I2S3_WS_PIN 	GPIO_Pin_4  //port A
 
 #define I2S3_MCLK_PIN 	GPIO_Pin_7  //port C
@@ -35,7 +35,7 @@
 
 #define CODEC_MAPBYTE_INC 0x80
 
-//register map bytes for CS42L22 (see page 35)
+// register map bytes for CS42L22 (see page 35)
 #define CODEC_MAP_CHIP_ID   0x01
 #define CODEC_MAP_PWR_CTRL1 0x02
 #define CODEC_MAP_PWR_CTRL2 0x04
@@ -72,10 +72,10 @@
 #define CODEC_MAP_VP_BATT_LEVEL 0x30
 #define CODEC_MAP_SPEAK_STATUS 0x31
 #define CODEC_MAP_CHARGE_PUMP_FREQ 0x34
-//do sterowania glosnoscia
+// do sterowania glosnoscia
 #define CODEC_FLAG_TIMEOUT ((uint32_t)0x1000)
 #define CODEC_LONG_TIMEOUT ((uint32_t)(300 * CODEC_FLAG_TIMEOUT))
-//function prototypes
+// function prototypes
 void codec_init();
 void codec_ctrl_init();
 void send_codec_ctrl(uint8_t controlBytes[], uint8_t numBytes);

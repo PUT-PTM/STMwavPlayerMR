@@ -79,7 +79,7 @@ void TIM5_IRQHandler(void)
 	{
 		// miejsce na kod wywolywany w momencie wystapienia przerwania
 		// drgania stykow + zmiana piosenki
-		change_song=1;//1 - wcisnieto przycisk, by zmienic utwor
+		change_song=1;// 1 - wcisnieto przycisk, by zmienic utwor
 		TIM_Cmd(TIM5, DISABLE);
 		TIM_SetCounter(TIM5, 0);
 		// wyzerowanie flagi wyzwolonego przerwania
@@ -249,24 +249,24 @@ void MY_DMA_initM2P()
 }
 void ADC_conversion()
 {
-	//Odczyt wartosci przez odpytnie flagi zakonczenia konwersji
-	//Wielorazowe sprawdzenie wartoci wyniku konwersji
+	// Odczyt wartosci przez odpytnie flagi zakonczenia konwersji
+	// Wielorazowe sprawdzenie wartoci wyniku konwersji
 	ADC_SoftwareStartConv(ADC1);
 	while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
 	result_of_conversion = ((ADC_GetConversionValue(ADC1))/16);
 }
 void TIM2_ADC_init()
 {
-	//Wejscie do przerwania od TIM2 co <0.05 s
+	// Wejscie do przerwania od TIM2 co <0.05 s
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	// 2. UTWORZENIE STRUKTURY KONFIGURACYJNEJ
 	TIM_TimeBaseInitTypeDef TIMER_2;
-	TIMER_2.TIM_Period = 2100-1; //okres zliczania nie przekroczyc 2^16!
-	TIMER_2.TIM_Prescaler = 2000-1;  //wartosc preskalera, tutaj bardzo mala
-	TIMER_2.TIM_ClockDivision = TIM_CKD_DIV1; //dzielnik zegara
-	TIMER_2.TIM_CounterMode = TIM_CounterMode_Up; //kierunek zliczania
+	TIMER_2.TIM_Period = 2100-1;// okres zliczania nie przekroczyc 2^16!
+	TIMER_2.TIM_Prescaler = 2000-1;// wartosc preskalera, tutaj bardzo mala
+	TIMER_2.TIM_ClockDivision = TIM_CKD_DIV1;// dzielnik zegara
+	TIMER_2.TIM_CounterMode = TIM_CounterMode_Up;// kierunek zliczania
 	TIM_TimeBaseInit(TIM2, &TIMER_2);
-	TIM_Cmd(TIM2, ENABLE);	//Uruchomienie Timera
+	TIM_Cmd(TIM2, ENABLE);// Uruchomienie Timera
 
 	// KONFIGURACJA PRZERWAN - TIMER/COUNTER
 	NVIC_InitTypeDef NVIC_InitStructure;
@@ -280,43 +280,43 @@ void TIM2_ADC_init()
 }
 void ADC_init()
 {
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA , ENABLE);//zegar dla portu GPIO z ktorego wykorzystany zostanie pin
-	//jako wejscie ADC (PA1)
-	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);//zegar dla modulu ADC1
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA , ENABLE);// zegar dla portu GPIO z ktorego wykorzystany zostanie pin
+	// jako wejscie ADC (PA1)
+	RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC1, ENABLE);// zegar dla modulu ADC1
 
-	//inicjalizacja wejscia ADC
+	// inicjalizacja wejscia ADC
 	GPIO_InitTypeDef  GPIO_InitStructureADC;
 	GPIO_InitStructureADC.GPIO_Pin = GPIO_Pin_1;
 	GPIO_InitStructureADC.GPIO_Mode = GPIO_Mode_AN;
 	GPIO_InitStructureADC.GPIO_PuPd = GPIO_PuPd_NOPULL;
 	GPIO_Init(GPIOA, &GPIO_InitStructureADC);
 
-	ADC_CommonInitTypeDef ADC_CommonInitStructure;//Konfiguracja dla wszystkich ukladow ADC
+	ADC_CommonInitTypeDef ADC_CommonInitStructure;// Konfiguracja dla wszystkich ukladow ADC
 	ADC_CommonInitStructure.ADC_Mode = ADC_Mode_Independent;// niezalezny tryb pracy przetwornikow
 	ADC_CommonInitStructure.ADC_Prescaler = ADC_Prescaler_Div2;// zegar glowny podzielony przez 2
 	ADC_CommonInitStructure.ADC_DMAAccessMode = ADC_DMAAccessMode_Disabled;// opcja istotna tylko dla tryby multi ADC
 	ADC_CommonInitStructure.ADC_TwoSamplingDelay = ADC_TwoSamplingDelay_5Cycles;// czas przerwy pomiedzy kolejnymi konwersjami
 	ADC_CommonInit(&ADC_CommonInitStructure);
 
-	ADC_InitTypeDef ADC_InitStructure;//Konfiguracja danego przetwornika
-	ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;//ustawienie rozdzielczosci przetwornika na maksymalna (12 bitow)
-	//wylaczenie trybu skanowania (odczytywac bedziemy jedno wejscie ADC
-	//w trybie skanowania automatycznie wykonywana jest konwersja na wielu
-	//wejsciach/kanalach)
+	ADC_InitTypeDef ADC_InitStructure;// Konfiguracja danego przetwornika
+	ADC_InitStructure.ADC_Resolution = ADC_Resolution_12b;// ustawienie rozdzielczosci przetwornika na maksymalna (12 bitow)
+	// wylaczenie trybu skanowania (odczytywac bedziemy jedno wejscie ADC
+	// w trybie skanowania automatycznie wykonywana jest konwersja na wielu
+	// wejsciach/kanalach)
 	ADC_InitStructure.ADC_ScanConvMode = DISABLE;
-	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;//wlaczenie ciaglego trybu pracy wylaczenie zewnetrznego wyzwalania
-	//konwersja moze byc wyzwalana timerem, stanem wejscia itd. (szczegoly w dokumentacji)
+	ADC_InitStructure.ADC_ContinuousConvMode = ENABLE;// wlaczenie ciaglego trybu pracy wylaczenie zewnetrznego wyzwalania
+	// konwersja moze byc wyzwalana timerem, stanem wejscia itd. (szczegoly w dokumentacji)
 	ADC_InitStructure.ADC_ExternalTrigConv = ADC_ExternalTrigConv_T1_CC1;
 	ADC_InitStructure.ADC_ExternalTrigConvEdge = ADC_ExternalTrigConvEdge_None;
-	//wartosc binarna wyniku bedzie podawana z wyrownaniem do prawej
-	//funkcja do odczytu stanu przetwornika ADC zwraca wartosc 16-bitowa
-	//dla przykladu, wartosc 0xFF wyrownana w prawo to 0x00FF, w lewo 0x0FF0
+	// wartosc binarna wyniku bedzie podawana z wyrownaniem do prawej
+	// funkcja do odczytu stanu przetwornika ADC zwraca wartosc 16-bitowa
+	// dla przykladu, wartosc 0xFF wyrownana w prawo to 0x00FF, w lewo 0x0FF0
 	ADC_InitStructure.ADC_DataAlign = ADC_DataAlign_Right;
-	ADC_InitStructure.ADC_NbrOfConversion = 1;//liczba konwersji rowna 1, bo 1 kanal
+	ADC_InitStructure.ADC_NbrOfConversion = 1;// liczba konwersji rowna 1, bo 1 kanal
 	ADC_Init(ADC1, &ADC_InitStructure);// zapisz wypelniona strukture do rejestrow przetwornika numer 1
 
-	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_84Cycles);//Konfiguracja kanalu pierwszego ADC
-	ADC_Cmd(ADC1, ENABLE);//Uruchomienie przetwornika ADC
+	ADC_RegularChannelConfig(ADC1, ADC_Channel_1, 1, ADC_SampleTime_84Cycles);// Konfiguracja kanalu pierwszego ADC
+	ADC_Cmd(ADC1, ENABLE);// Uruchomienie przetwornika ADC
 
 	TIM2_ADC_init();
 }
@@ -390,8 +390,8 @@ int main( void )
 	delay_init( 80 );// wyslanie 80 impulsow zegarowych; do inicjalizacji SPI
 	SPI_SD_Init();// inicjalizacja SPI pod SD
 
-	//SysTick_CLK... >> taktowany z f = ok. 82MHz/8 = ok. 10MHz
-	//Systick_Config >> generuje przerwanie co <10ms
+	// SysTick_CLK... >> taktowany z f = ok. 82MHz/8 = ok. 10MHz
+	// Systick_Config >> generuje przerwanie co <10ms
 	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);// zegar 24-bitowy
 	SysTick_Config(90000);
 
@@ -401,7 +401,7 @@ int main( void )
 	DIODES_INTERRUPT();
 	ERROR_TIM_4();
 
-	//SD CARD
+	// SD CARD
 	FRESULT fresult;
 	DIR Dir;
 	FILINFO fileInfo;
@@ -411,7 +411,7 @@ int main( void )
 
 	I2S_Cmd(CODEC_I2S, ENABLE);// Integrated Interchip Sound to connect digital devices
 
-	struct List *first=0,*last=0;
+	struct List *first=0,*last=0,*pointer;
 	bool is_the_first_element=0;
 
 	disk_initialize(0);// inicjalizacja karty
@@ -460,15 +460,18 @@ int main( void )
 		{ }
 	}
 	last->next=first;
+	first->previous=last;
+	pointer=first;
 	MY_DMA_initM2P();
 	for(;;)
 	{
-		play_wav(first, fresult);
+		play_wav(pointer, fresult);
 		if(error_state!=0)
 		{
 			break;
 		}
-		first=first->next;
+		//pointer=pointer->previous;// do zaktualizowania przy dodatkowych buttonach
+		pointer=pointer->next;
 	}
 	GPIO_ResetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15|CODEC_RESET_PIN);
 	TIM_Cmd(TIM2,DISABLE);

@@ -1,5 +1,4 @@
 //*************************************
-//
 //  codec related functions
 //	http://www.mind-dump.net/configuring-the-stm32f4-discovery-for-audio
 //*************************************
