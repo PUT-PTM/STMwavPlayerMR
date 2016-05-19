@@ -4,8 +4,8 @@
 <window>
 <fastViewData fastViewLocation="1024">
 <orientation position="512" view="org.eclipse.debug.ui.ExpressionView"/>
-<orientation position="512" view="org.coocox.builder.ui.views.ProjectView"/>
 <orientation position="512" view="org.coocox.component.ui.ComponentView"/>
+<orientation position="512" view="org.coocox.builder.ui.views.ProjectView"/>
 <orientation position="512" view="org.coocox.codebugger.trace.ui.traceview"/>
 <orientation position="512" view="org.eclipse.debug.ui.DebugView"/>
 <orientation position="512" view="org.eclipse.ui.console.ConsoleView"/>
@@ -23,10 +23,6 @@
 <part id="1"/>
 <part id="2"/>
 <part id="3"/>
-<part id="4"/>
-<part id="5"/>
-<part id="6"/>
-<part id="7"/>
 </presentation>
 </folder>
 </info>
@@ -39,29 +35,13 @@
 <input factoryID="org.coocox.component.ui.editors.repository.RepositoryElementFactory">&#x0A;<subPage horizontalPosition="0" selectedItemId="514" subPageIndex="2" verticalPosition="387"/>
 </input>
 </editor>
-<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" partName="main.c" path="C:/Users/Monika/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/main.c" title="main.c" tooltip="C:/Users/Monika/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/main.c" workbook="DefaultEditorWorkbook">
+<editor activePart="true" focus="true" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" partName="main.c" path="C:/Users/Robert/Desktop/POPRAWKA/STMwavPlayerMR/STMwavPlayerMR/main.c" title="main.c" tooltip="C:/Users/Robert/Desktop/POPRAWKA/STMwavPlayerMR/STMwavPlayerMR/main.c" workbook="DefaultEditorWorkbook">
 <input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STMwavPlayerMR/main.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="10054" selectionTopPixel="546"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="402" selectionTopPixel="0"/>
 </editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="spi_sd.c" partName="spi_sd.c" path="C:/Users/Robert/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/spi_sd.c" title="spi_sd.c" tooltip="C:/Users/Robert/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/spi_sd.c" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STMwavPlayerMR/spi_sd.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="5018" selectionTopPixel="884"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="codec.c" partName="codec.c" path="C:/Users/Robert/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/codec.c" title="codec.c" tooltip="C:/Users/Robert/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/codec.c" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STMwavPlayerMR/codec.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="40" selectionOffset="1945" selectionTopPixel="612"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="codec.h" partName="codec.h" path="C:/Users/Robert/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/codec.h" title="codec.h" tooltip="C:/Users/Robert/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/codec.h" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STMwavPlayerMR/codec.h"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="2240" selectionTopPixel="985"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx.h" partName="stm32f4xx.h" path="C:/Users/Monika/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/cmsis_boot/stm32f4xx.h" title="stm32f4xx.h" tooltip="C:/Users/Monika/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/cmsis_boot/stm32f4xx.h" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STMwavPlayerMR/cmsis_boot/stm32f4xx.h"/>
-<editorState selectionHorizontalPixel="0" selectionLength="3" selectionOffset="17152" selectionTopPixel="4352"/>
-</editor>
-<editor id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f4xx.c" partName="startup_stm32f4xx.c" path="C:/Users/Monika/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/cmsis_boot/startup/startup_stm32f4xx.c" title="startup_stm32f4xx.c" tooltip="C:/Users/Monika/Documents/GitHub/STMwavPlayerMR/STMwavPlayerMR/cmsis_boot/startup/startup_stm32f4xx.c" workbook="DefaultEditorWorkbook">
-<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STMwavPlayerMR/cmsis_boot/startup/startup_stm32f4xx.c"/>
-<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="14795" selectionTopPixel="3859"/>
+<editor id="org.eclipse.cdt.ui.editor.CEditor" name="system_stm32f4xx.c" partName="system_stm32f4xx.c" path="C:/Users/Robert/Desktop/POPRAWKA/STMwavPlayerMR/STMwavPlayerMR/cmsis_boot/system_stm32f4xx.c" title="system_stm32f4xx.c" tooltip="C:/Users/Robert/Desktop/POPRAWKA/STMwavPlayerMR/STMwavPlayerMR/cmsis_boot/system_stm32f4xx.c" workbook="DefaultEditorWorkbook">
+<input factoryID="org.eclipse.ui.part.FileEditorInputFactory" path="/STMwavPlayerMR/cmsis_boot/system_stm32f4xx.c"/>
+<editorState selectionHorizontalPixel="0" selectionLength="0" selectionOffset="7736" selectionTopPixel="663"/>
 </editor>
 </editors>
 <views>
@@ -74,7 +54,7 @@
 <element path="/STMwavPlayerMR/cmsis_lib/include"/>
 </expanded>
 <selection>
-<element path="/STMwavPlayerMR/cmsis_boot/stm32f4xx.h"/>
+<element path="/STMwavPlayerMR/cmsis_boot/system_stm32f4xx.c"/>
 </selection>
 </viewState>
 </view>
@@ -223,8 +203,8 @@
 <hide_toolbar_item_id id="org.eclipse.ui.edit.text.toggleShowSelectedElementOnly"/>
 <hide_toolbar_item_id id="org.coocox.builder.ui.build"/>
 <hide_toolbar_item_id id="org.coocox.welcome.ui.action.welcome"/>
-<hide_toolbar_item_id id="org.coocox.component.ui.ShowRepositoryAction"/>
 <hide_toolbar_item_id id="org.coocox.codebugger.configuration.coideProgramDownloadAction"/>
+<hide_toolbar_item_id id="org.coocox.component.ui.ShowRepositoryAction"/>
 <view id="org.eclipse.ui.console.ConsoleView"/>
 <view id="org.eclipse.debug.ui.DebugView"/>
 <view id="org.coocox.codebugger.trace.ui.traceview"/>
@@ -241,7 +221,7 @@
 <page content="org.eclipse.ui.internal.introview" label="LabelNotFound"/>
 </folder>
 </info>
-<info folder="true" part="org.eclipse.ui.internal.ViewStack@2489a4" ratio="0.69952303" ratioLeft="440" ratioRight="189" relationship="4" relative="org.eclipse.ui.internal.ViewStack@1e022d3">&#x0A;<folder activePageID="org.eclipse.debug.ui.DebugView" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ui.console.ConsoleView" label="Console"/>
+<info folder="true" part="org.eclipse.ui.internal.ViewStack@2489a4" ratio="0.69952303" ratioLeft="440" ratioRight="189" relationship="4" relative="org.eclipse.ui.internal.ViewStack@1e022d3">&#x0A;<folder activePageID="org.eclipse.ui.console.ConsoleView" appearance="2" expanded="2">&#x0A;<page content="org.eclipse.ui.console.ConsoleView" label="Console"/>
 <page content="org.eclipse.debug.ui.DebugView" label="Debug"/>
 <page content="org.eclipse.debug.ui.BreakpointView" label="LabelNotFound"/>
 <presentation id="org.eclipse.ui.presentations.WorkbenchPresentationFactory">&#x0A;<part id="0"/>
@@ -275,161 +255,163 @@
 <navigationHistory>
 <editors>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STMwavPlayerMR/main.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STMwavPlayerMR/codec.h"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STMwavPlayerMR/codec.c"/>
-<editor factoryID="org.coocox.component.ui.editors.repository.RepositoryElementFactory" id="org.coocox.builder.ui.editors.repository.RepositoryBrowser">
-<subPage horizontalPosition="0" selectedItemId="0" subPageIndex="0" verticalPosition="0"/>
-</editor>
-<editor factoryID="org.coocox.component.ui.editors.repository.RepositoryElementFactory" id="org.coocox.builder.ui.editors.repository.RepositoryBrowser">
-<subPage horizontalPosition="0" selectedItemId="514" subPageIndex="2" verticalPosition="387"/>
-</editor>
-<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STMwavPlayerMR/cmsis_boot/startup/startup_stm32f4xx.c"/>
 <editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STMwavPlayerMR/cmsis_boot/stm32f4xx.h"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STMwavPlayerMR/cmsis_boot/startup/startup_stm32f4xx.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STMwavPlayerMR/cmsis_boot/system_stm32f4xx.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STMwavPlayerMR/spi_sd.c"/>
+<editor factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" path="/STMwavPlayerMR/cmsis_boot/system_stm32f4xx.c"/>
 </editors>
-<item historyLabel="codec.c" index="1">
-<position info="not_deleted" x="1945" y="40"/>
-</item>
-<item historyLabel="Repository" index="2"/>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="13344" y="0"/>
+<item historyLabel="stm32f4xx.h" index="3">
+<position info="not_deleted" x="3574" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="11393" y="0"/>
+<position info="not_deleted" x="9087" y="0"/>
+</item>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2011" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="10153" y="0"/>
+<position info="not_deleted" x="9087" y="0"/>
+</item>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2184" y="0"/>
+</item>
+<item historyLabel="codec.h" index="1">
+<position info="not_deleted" x="2240" y="0"/>
+</item>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2184" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="956" y="0"/>
+<position info="not_deleted" x="9087" y="0"/>
+</item>
+<item historyLabel="codec.h" index="1">
+<position info="not_deleted" x="2240" y="0"/>
+</item>
+<item historyLabel="stm32f4xx.h" index="3">
+<position info="not_deleted" x="3574" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="10125" y="0"/>
+<position info="not_deleted" x="14107" y="0"/>
 </item>
-<item historyLabel="Repository" index="3"/>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="10125" y="0"/>
+<item historyLabel="stm32f4xx.h" index="3">
+<position info="not_deleted" x="3574" y="0"/>
 </item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="400" y="0"/>
+<item historyLabel="codec.h" index="1">
+<position info="not_deleted" x="2240" y="0"/>
 </item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="858" y="42"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="777" y="0"/>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2184" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="15410" y="0"/>
+<position info="not_deleted" x="9017" y="0"/>
+</item>
+<item historyLabel="codec.h" index="1">
+<position info="not_deleted" x="2240" y="0"/>
+</item>
+<item historyLabel="stm32f4xx.h" index="3">
+<position info="not_deleted" x="3574" y="0"/>
+</item>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2197" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="16600" y="22"/>
+<position info="not_deleted" x="9017" y="0"/>
+</item>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2197" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="15410" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="779" y="0"/>
+<position info="not_deleted" x="9017" y="0"/>
 </item>
 <item historyLabel="startup_stm32f4xx.c" index="4">
-<position info="not_deleted" x="0" y="0"/>
+<position info="not_deleted" x="14229" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="15410" y="0"/>
+<position info="not_deleted" x="9017" y="0"/>
+</item>
+<item historyLabel="system_stm32f4xx.c" index="5">
+<position info="not_deleted" x="7896" y="0"/>
+</item>
+<item historyLabel="spi_sd.c" index="6">
+<position info="not_deleted" x="5018" y="0"/>
+</item>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2197" y="0"/>
+</item>
+<item historyLabel="system_stm32f4xx.c" index="5">
+<position info="not_deleted" x="7736" y="0"/>
+</item>
+<item historyLabel="spi_sd.c" index="6">
+<position info="not_deleted" x="5018" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="11400" y="0"/>
+<position info="not_deleted" x="9778" y="0"/>
 </item>
-<item historyLabel="startup_stm32f4xx.c" index="4">
-<position info="not_deleted" x="87" y="0"/>
+<item historyLabel="system_stm32f4xx.c" index="5">
+<position info="not_deleted" x="7736" y="0"/>
 </item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="15410" y="0"/>
+<item historyLabel="stm32f4xx.h" index="3">
+<position info="not_deleted" x="3574" y="0"/>
 </item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="11397" y="0"/>
+<item historyLabel="system_stm32f4xx.c" index="5">
+<position info="not_deleted" x="7736" y="0"/>
 </item>
-<item historyLabel="startup_stm32f4xx.c" index="4">
-<position info="not_deleted" x="14795" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="15410" y="0"/>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2197" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="14816" y="0"/>
+<position info="not_deleted" x="9778" y="0"/>
 </item>
-<item historyLabel="startup_stm32f4xx.c" index="4">
-<position info="not_deleted" x="14795" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="15410" y="0"/>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2409" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="16559" y="0"/>
+<position info="not_deleted" x="342" y="0"/>
+</item>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2409" y="0"/>
+</item>
+<item historyLabel="codec.h" index="1">
+<position info="not_deleted" x="2240" y="0"/>
+</item>
+<item historyLabel="stm32f4xx.h" index="3">
+<position info="not_deleted" x="3574" y="0"/>
+</item>
+<item historyLabel="codec.h" index="1">
+<position info="not_deleted" x="2212" y="0"/>
+</item>
+<item historyLabel="codec.c" index="2">
+<position info="not_deleted" x="2409" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="2271" y="0"/>
+<position info="not_deleted" x="342" y="0"/>
+</item>
+<item historyLabel="system_stm32f4xx.c" index="7">
+<position info="not_deleted" x="7736" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="15884" y="15"/>
+<position info="not_deleted" x="14291" y="0"/>
+</item>
+<item historyLabel="system_stm32f4xx.c" index="7">
+<position info="not_deleted" x="7736" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="11379" y="0"/>
+<position info="not_deleted" x="15577" y="0"/>
+</item>
+<item historyLabel="system_stm32f4xx.c" index="7">
+<position info="not_deleted" x="7736" y="0"/>
 </item>
 <item historyLabel="main.c" index="0">
-<position info="not_deleted" x="16456" y="0"/>
+<position info="not_deleted" x="15577" y="0"/>
 </item>
-<item historyLabel="startup_stm32f4xx.c" index="4">
-<position info="not_deleted" x="14795" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="15410" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="779" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="858" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="779" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="858" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="779" y="50"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="11649" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="6769" y="40"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="17380" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="467" y="20"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="10000" y="66"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="10122" y="0"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="10000" y="66"/>
-</item>
-<item historyLabel="main.c" index="0">
-<position info="not_deleted" x="858" y="44"/>
-</item>
-<item historyLabel="stm32f4xx.h" index="5">
-<position info="not_deleted" x="3575" y="0"/>
-</item>
-<item historyLabel="stm32f4xx.h" index="5">
-<position info="not_deleted" x="17152" y="3"/>
+<item historyLabel="system_stm32f4xx.c" index="7">
+<position info="not_deleted" x="7736" y="0"/>
 </item>
 <item active="true" historyLabel="main.c" index="0">
-<position info="not_deleted" x="431" y="0"/>
+<position info="not_deleted" x="15577" y="0"/>
 </item>
 </navigationHistory>
 <input factoryID="org.eclipse.ui.internal.model.ResourceFactory" path="/" type="8"/>
@@ -438,50 +420,50 @@
 <actionBarAdvisor/>
 </window>
 <mruList>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f4xx.c" tooltip="STMwavPlayerMR/cmsis_boot/startup/startup_stm32f4xx.c">
-<persistable path="/STMwavPlayerMR/cmsis_boot/startup/startup_stm32f4xx.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="system_stm32f4xx.c" tooltip="STMwavPlayerMR/cmsis_boot/system_stm32f4xx.c">
+<persistable path="/STMwavPlayerMR/cmsis_boot/system_stm32f4xx.c"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="spi_sd.c" tooltip="STMwavPlayerMR/spi_sd.c">
-<persistable path="/STMwavPlayerMR/spi_sd.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_rcc.h" tooltip="STMwavPlayerMR/cmsis_lib/include/stm32f4xx_rcc.h">
+<persistable path="/STMwavPlayerMR/cmsis_lib/include/stm32f4xx_rcc.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="codec.h" tooltip="STMwavPlayerMR/codec.h">
-<persistable path="/STMwavPlayerMR/codec.h"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f4xx.c" tooltip="Lab_06/cmsis_boot/startup/startup_stm32f4xx.c">
+<persistable path="/Lab_06/cmsis_boot/startup/startup_stm32f4xx.c"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="List.h" tooltip="STMwavPlayerMR/List.h">
-<persistable path="/STMwavPlayerMR/List.h"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="ff.h" tooltip="STMwavPlayerMR/FatFS/ff.h">
+<persistable path="/STMwavPlayerMR/FatFS/ff.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="List.c" tooltip="STMwavPlayerMR/List.c">
-<persistable path="/STMwavPlayerMR/List.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_dma.c" tooltip="STMwavPlayerMR/cmsis_lib/source/stm32f4xx_dma.c">
+<persistable path="/STMwavPlayerMR/cmsis_lib/source/stm32f4xx_dma.c"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="codec.c" tooltip="STMwavPlayerMR/codec.c">
-<persistable path="/STMwavPlayerMR/codec.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_gpio.h" tooltip="STMwavPlayerMR/cmsis_lib/include/stm32f4xx_gpio.h">
+<persistable path="/STMwavPlayerMR/cmsis_lib/include/stm32f4xx_gpio.h"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_dma.h" tooltip="STMwavPlayerMR/cmsis_lib/include/stm32f4xx_dma.h">
+<persistable path="/STMwavPlayerMR/cmsis_lib/include/stm32f4xx_dma.h"/>
 </file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx.h" tooltip="STMwavPlayerMR/cmsis_boot/stm32f4xx.h">
 <persistable path="/STMwavPlayerMR/cmsis_boot/stm32f4xx.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="system_stm32f4xx.c" tooltip="STMwavPlayerMR/cmsis_boot/system_stm32f4xx.c">
-<persistable path="/STMwavPlayerMR/cmsis_boot/system_stm32f4xx.c"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="system_stm32f4xx.h" tooltip="STMwavPlayerMR/cmsis_boot/system_stm32f4xx.h">
-<persistable path="/STMwavPlayerMR/cmsis_boot/system_stm32f4xx.h"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="codec.h" tooltip="simpleAudioExample/codec.h">
-<persistable path="/simpleAudioExample/codec.h"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx.h" tooltip="simpleAudioExample/cmsis_boot/stm32f4xx.h">
-<persistable path="/simpleAudioExample/cmsis_boot/stm32f4xx.h"/>
-</file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="Lista.c" tooltip="STMwavPlayerMR/Lista.c">
-<persistable path="/STMwavPlayerMR/Lista.c"/>
-</file>
 <file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="Lista.h" tooltip="STMwavPlayerMR/Lista.h">
 <persistable path="/STMwavPlayerMR/Lista.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" tooltip="STMwavPlayerMR/main.c">
-<persistable path="/STMwavPlayerMR/main.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_spi.h" tooltip="STMwavPlayerMR/cmsis_lib/include/stm32f4xx_spi.h">
+<persistable path="/STMwavPlayerMR/cmsis_lib/include/stm32f4xx_spi.h"/>
 </file>
-<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="main.c" tooltip="STMwavPlayerMR/main.c">
-<persistable path="/STMwavPlayerMR/main.c"/>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_i2c.c" tooltip="STMwavPlayerMR/cmsis_lib/source/stm32f4xx_i2c.c">
+<persistable path="/STMwavPlayerMR/cmsis_lib/source/stm32f4xx_i2c.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_i2c.h" tooltip="STMwavPlayerMR/cmsis_lib/include/stm32f4xx_i2c.h">
+<persistable path="/STMwavPlayerMR/cmsis_lib/include/stm32f4xx_i2c.h"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_conf.h" tooltip="STMwavPlayerMR/cmsis_boot/stm32f4xx_conf.h">
+<persistable path="/STMwavPlayerMR/cmsis_boot/stm32f4xx_conf.h"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="startup_stm32f4xx.c" tooltip="STMwavPlayerMR/cmsis_boot/startup/startup_stm32f4xx.c">
+<persistable path="/STMwavPlayerMR/cmsis_boot/startup/startup_stm32f4xx.c"/>
+</file>
+<file factoryID="org.eclipse.ui.part.FileEditorInputFactory" id="org.eclipse.cdt.ui.editor.CEditor" name="stm32f4xx_spi.h" tooltip="STMwavPlayerMR/cmsis_lib/include/stm32f4xx_spi.h">
+<persistable path="/STMwavPlayerMR/cmsis_lib/include/stm32f4xx_spi.h"/>
 </file>
 </mruList>
 </workbench>

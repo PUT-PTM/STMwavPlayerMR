@@ -17,7 +17,7 @@
 
 FATFS fatfs;
 FIL file;
-u32 sample_buffer[512];
+u16 sample_buffer[512];
 volatile u16 result_of_conversion=0;
 volatile u8 diode_state=0;
 volatile u8 change_song=0;
@@ -34,11 +34,11 @@ void EXTI0_IRQHandler(void)
 void TIM2_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM2, TIM_IT_Update) != RESET)
-		{
-			ADC_conversion();
-			Codec_VolumeCtrl(result_of_conversion);
-			TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
-		}
+	{
+		ADC_conversion();
+		Codec_VolumeCtrl(result_of_conversion);
+		TIM_ClearITPendingBit(TIM2, TIM_IT_Update);
+	}
 }
 void TIM3_IRQHandler(void)
 {
@@ -234,8 +234,8 @@ void MY_DMA_initM2P()
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(SPI3->DR));// adres docelowy
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;// zezwolenie na inkrementacje adresu po kazdej przeslanej paczce danych
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
-	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Word;
-	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Word;// ustalenie rozmiaru przesylanych danych
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_HalfWord;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;// ustalenie rozmiaru przesylanych danych
 	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;// ustalenie trybu pracy - jednorazwe przeslanie danych
 	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
 	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;// wylaczenie kolejki FIFO (nie uzywana w tym przykadzie
@@ -257,7 +257,7 @@ void ADC_conversion()
 }
 void TIM2_ADC_init()
 {
-	//Wejscie do przerwania od TIM2 co 0.05 s
+	//Wejscie do przerwania od TIM2 co <0.05 s
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
 	// 2. UTWORZENIE STRUKTURY KONFIGURACYJNEJ
 	TIM_TimeBaseInitTypeDef TIMER_2;
@@ -327,14 +327,14 @@ bool read_and_send(FRESULT fresult, int position, volatile ITStatus it_status, U
 	{
 		it_status = DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG);
 	}
-	fresult = f_read (&file,&sample_buffer[position],256*4,&read_bytes);
+	fresult = f_read (&file,&sample_buffer[position],256*2,&read_bytes);
 	DMA_ClearFlag(DMA1_Stream5, DMA_FLAG);
 	if(fresult != FR_OK)// jesli wyjeto karte w trakcie odtwarzania plikow
 	{
 		error_state=2;
 		return 0;
 	}
-	if(read_bytes<256*4||change_song==1)
+	if(read_bytes<256*2||change_song==1)
 	{
 		return 0;
 	}
@@ -390,8 +390,8 @@ int main( void )
 	delay_init( 80 );// wyslanie 80 impulsow zegarowych; do inicjalizacji SPI
 	SPI_SD_Init();// inicjalizacja SPI pod SD
 
-	//SysTick_CLK... >> taktowany z f = 72MHz/8 = 9MHz
-	//Systick_Config >> generuje przerwanie co 10ms
+	//SysTick_CLK... >> taktowany z f = ok. 82MHz/8 = ok. 10MHz
+	//Systick_Config >> generuje przerwanie co <10ms
 	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);// zegar 24-bitowy
 	SysTick_Config(90000);
 
