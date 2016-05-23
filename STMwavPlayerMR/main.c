@@ -18,17 +18,40 @@
 FATFS fatfs;
 FIL file;
 u16 sample_buffer[512];
+s8 num_of_switch=-1;
 volatile u16 result_of_conversion=0;
 volatile u8 diode_state=0;
-volatile u8 change_song=0;
+volatile s8 change_song=0;
 volatile u8 error_state=0;
 void EXTI0_IRQHandler(void)
 {
 	// drgania stykow
 	if(EXTI_GetITStatus(EXTI_Line0) != RESET)
 	{
+		num_of_switch=0;
 		TIM_Cmd(TIM5, ENABLE);
 		EXTI_ClearITPendingBit(EXTI_Line0);
+	}
+}
+void EXTI9_5_IRQHandler(void)
+{
+	if(EXTI_GetITStatus(EXTI_Line5) != RESET)
+	{
+		num_of_switch=5;
+		TIM_Cmd(TIM5, ENABLE);
+		EXTI_ClearITPendingBit(EXTI_Line5);
+	}
+	else if(EXTI_GetITStatus(EXTI_Line7) != RESET)
+	{
+		num_of_switch=7;
+		TIM_Cmd(TIM5, ENABLE);
+		EXTI_ClearITPendingBit(EXTI_Line7);
+	}
+	else if(EXTI_GetITStatus(EXTI_Line8) != RESET)
+	{
+		num_of_switch=8;
+		TIM_Cmd(TIM5, ENABLE);
+		EXTI_ClearITPendingBit(EXTI_Line8);
 	}
 }
 void TIM2_IRQHandler(void)
@@ -77,9 +100,24 @@ void TIM5_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM5, TIM_IT_Update) != RESET)
 	{
-		// miejsce na kod wywolywany w momencie wystapienia przerwania
-		// drgania stykow + zmiana piosenki
-		change_song=1;// 1 - wcisnieto przycisk, by zmienic utwor
+		// miejsce na kod wywolywany w momencie wystapienia przerwania, drgania stykow
+		if (num_of_switch==0)// wcisnieto user button 0 - losowe odtwarzanie
+		{
+			//miejsce na kod
+		}
+		else if (num_of_switch==5)// wcisnieto switch 5 - przewijanie do przodu
+		{
+			change_song=1;
+		}
+		else if (num_of_switch==7)// wcisnieto switch 7 - start/stop
+		{
+			//miejsce na kod
+		}
+		else if (num_of_switch==8)// wcisnieto switch 8 - przewijanie wstecz
+		{
+			change_song=-1;
+		}
+		num_of_switch=-1;
 		TIM_Cmd(TIM5, DISABLE);
 		TIM_SetCounter(TIM5, 0);
 		// wyzerowanie flagi wyzwolonego przerwania
@@ -111,25 +149,26 @@ void ERROR_TIM_4()
 }
 void JOINT_VIBRATION()
 {
-	// TIMER DO ELIMINACJI DRGAN STYKOW
-	// TIM5
+	// TIMER DO ELIMINACJI DRGAN STYKOW, TIM5
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM5, ENABLE);
-	TIM_TimeBaseInitTypeDef TIMER_5;
+
+	TIM_TimeBaseInitTypeDef TIMER;
 	/* Time base configuration */
-	TIMER_5.TIM_Period = 8400-1;
-	TIMER_5.TIM_Prescaler = 2000-1;
-	TIMER_5.TIM_ClockDivision = TIM_CKD_DIV1;
-	TIMER_5.TIM_CounterMode = TIM_CounterMode_Up;
-	TIM_TimeBaseInit(TIM5, &TIMER_5);
+	TIMER.TIM_Period = 8400-1;
+	TIMER.TIM_Prescaler = 2000-1;
+	TIMER.TIM_ClockDivision = TIM_CKD_DIV1;
+	TIMER.TIM_CounterMode = TIM_CounterMode_Up;
+
+	TIM_TimeBaseInit(TIM5, &TIMER);
 	TIM_Cmd(TIM5,DISABLE);
 
 	// KONFIGURACJA PRZERWAN - TIMER/COUNTER
-	NVIC_InitTypeDef NVIC_InitStructure3;
-	NVIC_InitStructure3.NVIC_IRQChannel = TIM5_IRQn;// numer przerwania
-	NVIC_InitStructure3.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet glowny
-	NVIC_InitStructure3.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
-	NVIC_InitStructure3.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kanal
-	NVIC_Init(&NVIC_InitStructure3);// zapisz wypelniona strukture do rejestrow
+	NVIC_InitTypeDef NVIC_InitStructure;
+	NVIC_InitStructure.NVIC_IRQChannel = TIM5_IRQn;// numer przerwania
+	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 0x00;// priorytet glowny
+	NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0x00;// subpriorytet
+	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;// uruchom dany kanal
+	NVIC_Init(&NVIC_InitStructure);// zapisz wypelniona strukture do rejestrow
 	TIM_ClearITPendingBit(TIM5, TIM_IT_Update);// wyczyszczenie przerwania od timera 5 (wystapilo przy konfiguracji timera)
 	TIM_ITConfig(TIM5, TIM_IT_Update, ENABLE);// zezwolenie na przerwania od przepelnienia dla timera 5
 }
@@ -195,10 +234,18 @@ void spin_diodes()
 }
 void BUTTON_init()
 {
+	/*0 - tryb losowy
+	  5 - przewijanie wstecz
+	  6 - start/stop
+	  7 - przewijanie do przodu*/
 	GPIO_InitTypeDef USER_BUTTON;
 	USER_BUTTON.GPIO_Pin = GPIO_Pin_0;
 	USER_BUTTON.GPIO_Mode = GPIO_Mode_IN;
 	USER_BUTTON.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_Init(GPIOA, &USER_BUTTON);
+
+	USER_BUTTON.GPIO_Pin = GPIO_Pin_5 | GPIO_Pin_7 | GPIO_Pin_8;
+	USER_BUTTON.GPIO_PuPd = GPIO_PuPd_DOWN;
 	GPIO_Init(GPIOA, &USER_BUTTON);
 }
 void INTERRUPT_init()
@@ -219,6 +266,15 @@ void INTERRUPT_init()
 	EXTI_Init(&EXTI_InitStructure);// zapisz strukture konfiguracyjna przerwan zewnetrznych do rejestrow
 
 	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource0);
+
+	// KONFIGURACJA KONTROLERA PRZERWAN DLA SWITCH Pin_5, Pin_6, Pin_7
+	NVIC_InitStructure.NVIC_IRQChannel = EXTI9_5_IRQn;
+	EXTI_InitStructure.EXTI_Line = EXTI_Line5 | EXTI_Line7 | EXTI_Line8;
+	NVIC_Init(&NVIC_InitStructure);
+	EXTI_Init(&EXTI_InitStructure);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource5);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource7);
+	SYSCFG_EXTILineConfig(EXTI_PortSourceGPIOA, EXTI_PinSource8);
 }
 void MY_DMA_initM2P()
 {
@@ -334,7 +390,7 @@ bool read_and_send(FRESULT fresult, int position, volatile ITStatus it_status, U
 		error_state=2;
 		return 0;
 	}
-	if(read_bytes<256*2||change_song==1)
+	if(read_bytes<256*2||change_song!=0)
 	{
 		return 0;
 	}
@@ -470,8 +526,14 @@ int main( void )
 		{
 			break;
 		}
-		//pointer=pointer->previous;// do zaktualizowania przy dodatkowych buttonach
-		pointer=pointer->next;
+		if(change_song>=0)// wcisnieto switch 5 albo skonczylo sie odtwarzanie utworu
+		{
+			pointer=pointer->next;
+		}
+		else if (change_song==-1)
+		{
+			pointer=pointer->previous;
+		}
 	}
 	GPIO_ResetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15|CODEC_RESET_PIN);
 	TIM_Cmd(TIM2,DISABLE);
