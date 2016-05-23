@@ -358,3 +358,37 @@ void Codec_TIMEOUT_UserCallback(void)
   {
   }
 }
+
+void Codec_PauseResume(uint32_t Cmd)
+{
+  /* Pause the audio file playing */
+  if (Cmd == AUDIO_PAUSE)
+  {
+    /* Mute the output first */
+    Codec_Mute(AUDIO_MUTE_ON);
+
+    /* Put the Codec in Power save mode */
+    Codec_WriteRegister(0x02, 0x01);
+  }
+  else /* AUDIO_RESUME */
+  {
+    /* Unmute the output first */
+    Codec_Mute(AUDIO_MUTE_OFF);
+
+    /* Exit the Power save mode */
+    Codec_WriteRegister(0x02, 0x9E);
+  }
+}
+
+void Codec_Mute(uint32_t Cmd)
+{
+  /* Set the Mute mode */
+  if (Cmd == AUDIO_MUTE_ON)
+  {
+    Codec_WriteRegister(0x04, 0xFF);
+  }
+  else /* AUDIO_MUTE_OFF Disable the Mute */
+  {
+    Codec_WriteRegister(0x04, 0);
+  }
+}

@@ -75,6 +75,14 @@
 // do sterowania glosnoscia
 #define CODEC_FLAG_TIMEOUT ((uint32_t)0x1000)
 #define CODEC_LONG_TIMEOUT ((uint32_t)(300 * CODEC_FLAG_TIMEOUT))
+
+#define AUDIO_PAUSE                   0
+#define AUDIO_RESUME                  1
+
+/* MUTE commands */
+#define AUDIO_MUTE_ON                 1
+#define AUDIO_MUTE_OFF                0
+
 // function prototypes
 void codec_init();
 void codec_ctrl_init();

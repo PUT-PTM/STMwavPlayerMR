@@ -8,6 +8,7 @@
 #include "stm32f4xx_dma.h"
 #include "stm32f4xx_adc.h"
 #include "stm32f4xx_rcc.h"
+#include "stm32f4xx_rng.h"
 #include "misc.h"
 #include "delay.h"
 #include "codec.h"
@@ -18,11 +19,14 @@
 FATFS fatfs;
 FIL file;
 u16 sample_buffer[512];
-s8 num_of_switch=-1;
+volatile s8 num_of_switch=-1;
 volatile u16 result_of_conversion=0;
 volatile u8 diode_state=0;
 volatile s8 change_song=0;
 volatile u8 error_state=0;
+volatile bool random_mode=0;
+bool pause=0;
+
 void EXTI0_IRQHandler(void)
 {
 	// drgania stykow
@@ -103,15 +107,28 @@ void TIM5_IRQHandler(void)
 		// miejsce na kod wywolywany w momencie wystapienia przerwania, drgania stykow
 		if (num_of_switch==0)// wcisnieto user button 0 - losowe odtwarzanie
 		{
-			//miejsce na kod
+			random_mode = (random_mode + 1) % 2;
 		}
 		else if (num_of_switch==5)// wcisnieto switch 5 - przewijanie do przodu
 		{
 			change_song=1;
 		}
-		else if (num_of_switch==7)// wcisnieto switch 7 - start/stop
+		else if (num_of_switch==7)// wcisnieto switch 7 - pauzuj/wznow
 		{
-			//miejsce na kod
+			if(pause==0)
+			{
+				pause=1;
+				TIM_Cmd(TIM3,DISABLE);
+				Codec_PauseResume(0);
+				NVIC_SystemLPConfig(NVIC_LP_SLEEPONEXIT, ENABLE);
+			}
+			else
+			{
+				pause=0;
+				TIM_Cmd(TIM3,ENABLE);
+				Codec_PauseResume(1);
+				NVIC_SystemLPConfig(NVIC_LP_SLEEPONEXIT, DISABLE);
+			}
 		}
 		else if (num_of_switch==8)// wcisnieto switch 8 - przewijanie wstecz
 		{
@@ -210,25 +227,61 @@ void DIODES_init()
 }
 void spin_diodes()
 {
-	GPIO_ResetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15);
+	if(random_mode==0)
+	{
+		GPIO_ResetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15);
+	}
+	else
+	{
+		GPIO_SetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15);
+	}
+
 	if(diode_state==3)
 	{
-		GPIO_SetBits(GPIOD, GPIO_Pin_12);
+		if(random_mode==0)
+		{
+			GPIO_SetBits(GPIOD, GPIO_Pin_12);
+		}
+		else
+		{
+			GPIO_ResetBits(GPIOD, GPIO_Pin_12);
+		}
 		diode_state=0;
 	}
 	else if(diode_state==2)
 	{
-		GPIO_SetBits(GPIOD, GPIO_Pin_13);
+		if(random_mode==0)
+		{
+			GPIO_SetBits(GPIOD, GPIO_Pin_13);
+		}
+		else
+		{
+			GPIO_ResetBits(GPIOD, GPIO_Pin_13);
+		}
 		diode_state=3;
 	}
 	else if(diode_state==1)
 	{
-		GPIO_SetBits(GPIOD, GPIO_Pin_14);
+		if(random_mode==0)
+		{
+			GPIO_SetBits(GPIOD, GPIO_Pin_14);
+		}
+		else
+		{
+			GPIO_ResetBits(GPIOD, GPIO_Pin_14);
+		}
 		diode_state=2;
 	}
 	else if(diode_state==0)
 	{
-		GPIO_SetBits(GPIOD, GPIO_Pin_15);
+		if(random_mode==0)
+		{
+			GPIO_SetBits(GPIOD, GPIO_Pin_15);
+		}
+		else
+		{
+			GPIO_ResetBits(GPIOD, GPIO_Pin_15);
+		}
 		diode_state=1;
 	}
 }
@@ -441,6 +494,8 @@ bool isWAV(FILINFO fileInfo)
 int main( void )
 {
 	SystemInit();
+	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_RNG, ENABLE);
+	RNG_Cmd(ENABLE);
 	DIODES_init();// inicjalizacja diod
 	ADC_init();
 	delay_init( 80 );// wyslanie 80 impulsow zegarowych; do inicjalizacji SPI
@@ -484,6 +539,7 @@ int main( void )
 	{
 		return(fresult);
 	}
+	u32 number_of_songs=0;
 	for(;;)
 	{
 		fresult = f_readdir(&Dir, &fileInfo);
@@ -506,6 +562,7 @@ int main( void )
 			{
 				last=add_last(last,fileInfo);
 			}
+			number_of_songs++;
 		}
 	}
 	if (first==0)// jesli na karcie nie ma plikow .wav
@@ -519,6 +576,8 @@ int main( void )
 	first->previous=last;
 	pointer=first;
 	MY_DMA_initM2P();
+	u32 rand_number=0;
+	u32 i_loop=0;
 	for(;;)
 	{
 		play_wav(pointer, fresult);
@@ -528,11 +587,33 @@ int main( void )
 		}
 		if(change_song>=0)// wcisnieto switch 5 albo skonczylo sie odtwarzanie utworu
 		{
-			pointer=pointer->next;
+			if(random_mode==1 && number_of_songs>1)
+			{
+				rand_number=RNG_GetRandomNumber()%(number_of_songs-1)+1;
+				for(i_loop=1;i_loop<=rand_number;i_loop++)
+				{
+					pointer=pointer->next;
+				}
+			}
+			else
+			{
+				pointer=pointer->next;
+			}
 		}
 		else if (change_song==-1)
 		{
-			pointer=pointer->previous;
+			if(random_mode==1 && number_of_songs>1)
+			{
+				rand_number=RNG_GetRandomNumber()%(number_of_songs-1)+1;
+				for(i_loop=1;i_loop<=rand_number;i_loop++)
+				{
+					pointer=pointer->previous;
+				}
+			}
+			else
+			{
+				pointer=pointer->previous;
+			}
 		}
 	}
 	GPIO_ResetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15|CODEC_RESET_PIN);
