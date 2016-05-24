@@ -172,7 +172,7 @@ void JOINT_VIBRATION()
 	TIM_TimeBaseInitTypeDef TIMER;
 	/* Time base configuration */
 	TIMER.TIM_Period = 8400-1;
-	TIMER.TIM_Prescaler = 2000-1;
+	TIMER.TIM_Prescaler = 3000-1;
 	TIMER.TIM_ClockDivision = TIM_CKD_DIV1;
 	TIMER.TIM_CounterMode = TIM_CounterMode_Up;
 
@@ -287,6 +287,7 @@ void spin_diodes()
 }
 void BUTTON_init()
 {
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA , ENABLE);
 	/*0 - tryb losowy
 	  5 - przewijanie wstecz
 	  6 - start/stop
@@ -494,10 +495,8 @@ bool isWAV(FILINFO fileInfo)
 int main( void )
 {
 	SystemInit();
-	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_RNG, ENABLE);
-	RNG_Cmd(ENABLE);
 	DIODES_init();// inicjalizacja diod
-	ADC_init();
+	ERROR_TIM_4();
 	delay_init( 80 );// wyslanie 80 impulsow zegarowych; do inicjalizacji SPI
 	SPI_SD_Init();// inicjalizacja SPI pod SD
 
@@ -506,24 +505,12 @@ int main( void )
 	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);// zegar 24-bitowy
 	SysTick_Config(90000);
 
-	BUTTON_init();
-	JOINT_VIBRATION();
-	INTERRUPT_init();
-	DIODES_INTERRUPT();
-	ERROR_TIM_4();
-
 	// SD CARD
 	FRESULT fresult;
 	DIR Dir;
 	FILINFO fileInfo;
 
-	codec_init();
-	codec_ctrl_init();
-
-	I2S_Cmd(CODEC_I2S, ENABLE);// Integrated Interchip Sound to connect digital devices
-
 	struct List *first=0,*last=0,*pointer;
-	bool is_the_first_element=0;
 
 	disk_initialize(0);// inicjalizacja karty
 	fresult = f_mount( &fatfs, 1,1 );// zarejestrowanie dysku logicznego w systemie
@@ -553,10 +540,9 @@ int main( void )
 		}
 		if(isWAV(fileInfo)==1)// sprawdzenie, czy plik na karcie ma rozszerzenie .wav
 		{
-			if(is_the_first_element==0)
+			if(number_of_songs==0)
 			{
 				first=last=add_last(last,fileInfo);
-				is_the_first_element++;
 			}
 			else
 			{
@@ -575,7 +561,18 @@ int main( void )
 	last->next=first;
 	first->previous=last;
 	pointer=first;
+
+	codec_init();
+	codec_ctrl_init();
+	I2S_Cmd(CODEC_I2S, ENABLE);// Integrated Interchip Sound to connect digital devices
 	MY_DMA_initM2P();
+	BUTTON_init();
+	ADC_init();
+	JOINT_VIBRATION();
+	INTERRUPT_init();
+	DIODES_INTERRUPT();
+	RCC_AHB2PeriphClockCmd(RCC_AHB2Periph_RNG, ENABLE);
+	RNG_Cmd(ENABLE);
 	u32 rand_number=0;
 	u32 i_loop=0;
 	for(;;)

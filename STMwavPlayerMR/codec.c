@@ -13,14 +13,14 @@ void codec_init()
 	I2S_InitTypeDef I2S_InitType;
 	I2C_InitTypeDef I2C_InitType;
 
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA| RCC_AHB1Periph_GPIOB|RCC_AHB1Periph_GPIOC|RCC_AHB1Periph_GPIOD, ENABLE);
+
 	//Reset pin as GPIO
 	PinInitStruct.GPIO_Pin = CODEC_RESET_PIN;
 	PinInitStruct.GPIO_Mode = GPIO_Mode_OUT;
 	PinInitStruct.GPIO_PuPd = GPIO_PuPd_DOWN;
 	PinInitStruct.GPIO_OType = GPIO_OType_PP;
 	PinInitStruct.GPIO_Speed = GPIO_Speed_50MHz;
-
-	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOA| RCC_AHB1Periph_GPIOB|RCC_AHB1Periph_GPIOC, ENABLE);
 	GPIO_Init(GPIOD, &PinInitStruct);
 
 	// I2C pins
