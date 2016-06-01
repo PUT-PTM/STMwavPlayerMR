@@ -466,6 +466,12 @@ void ADC_init()
 }
 bool read_and_send(FRESULT fresult, int position, volatile ITStatus it_status, UINT read_bytes, uint32_t DMA_FLAG)
 {
+	PCD8544_GotoXY(29, 27);
+	PCD8544_Puts("              ", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_GotoXY(29, 27);
+	PCD8544_Puts(song_time, PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_Refresh();
+
 	it_status = RESET;
 	while(it_status == RESET)
 	{
@@ -473,12 +479,6 @@ bool read_and_send(FRESULT fresult, int position, volatile ITStatus it_status, U
 	}
 	fresult = f_read (&file,&sample_buffer[position],1024*2,&read_bytes);
 	DMA_ClearFlag(DMA1_Stream5, DMA_FLAG);
-
-	PCD8544_GotoXY(30, 21);
-	PCD8544_Puts("              ", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
-	PCD8544_GotoXY(30, 21);
-	PCD8544_Puts(song_time, PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
-	PCD8544_Refresh();
 
 	if(fresult != FR_OK)// jesli wyjeto karte w trakcie odtwarzania plikow
 	{
@@ -504,8 +504,10 @@ void play_wav(struct List *song, FRESULT fresult)
 		song_time[0]=song_time[1]=song_time[3]=song_time[4]='0';
 		song_time[2]=':';
 		half_second=0;
-		PCD8544_GotoXY(30, 21);
-		PCD8544_Puts(song_time, PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+		PCD8544_GotoXY(8, 15);
+		PCD8544_Puts("                  ", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+		PCD8544_GotoXY(8, 15);
+		PCD8544_Puts(temporary_song->file.fname, PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
 		TIM_Cmd(TIM3, ENABLE);
 		while(1)
 		{
@@ -628,7 +630,7 @@ int main( void )
 	PCD8544_GotoXY(1, 2);
 	//Print data with Pixel Set mode and Fontsize of 5x7px
 	PCD8544_Puts("STMwavPlayerMR", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
-	PCD8544_GotoXY(30, 40);
+	PCD8544_GotoXY(32, 40);
 	PCD8544_Puts("2016", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
 	PCD8544_Refresh();
 
