@@ -227,7 +227,7 @@ const uint8_t PCD8544_Font3x5[106][3] = {
 void PCD8544_InitIO(void) {
 	GPIO_InitTypeDef GPIO_InitStruct;
 	//Enable clock for all pins
-	RCC_AHB1PeriphClockCmd(PCD8544_RST_RCC | PCD8544_CE_RCC | PCD8544_DC_RCC, ENABLE);
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOC, ENABLE);
 
 	//Common settings for all pins
 	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
@@ -254,12 +254,52 @@ void PCD8544_InitIO(void) {
 	PCD8544_CE_HIGH;
 
 	//Initialize SPI
-	TM_SPI_Init(PCD8544_SPI, PCD8544_SPI_PINSPACK);
+	SPI_InitTypeDef SPI_InitStruct;
+
+	/* Enable SPI clock */
+	RCC->APB1ENR |= RCC_APB1ENR_SPI2EN;
+
+	/* Init pins */
+	GPIO_InitStruct.GPIO_OType = GPIO_OType_PP;
+	GPIO_InitStruct.GPIO_PuPd = GPIO_PuPd_NOPULL;
+	GPIO_InitStruct.GPIO_Speed = GPIO_Speed_100MHz;
+	GPIO_InitStruct.GPIO_Mode = GPIO_Mode_AF;
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_3;
+	GPIO_Init(GPIOC, &GPIO_InitStruct);
+	GPIO_PinAFConfig(GPIOC, GPIO_PinSource3, GPIO_AF_SPI2);
+
+	GPIO_InitStruct.GPIO_Pin = GPIO_Pin_10;
+	GPIO_Init(GPIOB, &GPIO_InitStruct);
+	GPIO_PinAFConfig(GPIOB, GPIO_PinSource10, GPIO_AF_SPI2);
+
+	/* Fill SPI settings */
+	SPI_InitStruct.SPI_DataSize = SPI_DataSize_8b;
+	SPI_InitStruct.SPI_BaudRatePrescaler = SPI_BaudRatePrescaler_16;
+	SPI_InitStruct.SPI_Direction = SPI_Direction_2Lines_FullDuplex;
+	SPI_InitStruct.SPI_FirstBit = SPI_FirstBit_MSB;
+	SPI_InitStruct.SPI_Mode = SPI_Mode_Master;
+
+	/* SPI mode */
+	SPI_InitStruct.SPI_CPOL = SPI_CPOL_Low;
+	SPI_InitStruct.SPI_CPHA = SPI_CPHA_1Edge;
+	SPI_InitStruct.SPI_NSS = SPI_NSS_Soft;
+
+	/* Disable first */
+	SPI_Cmd(SPI2, DISABLE);
+
+	/* Init SPI */
+	SPI_Init(SPI2, &SPI_InitStruct);
+
+	/* Enable SPI */
+	SPI_Cmd(SPI2, ENABLE);
 }
 
 void PCD8544_send(unsigned char data) {
 	PCD8544_CE_LOW;
-	TM_SPI_Send(PCD8544_SPI, data);
+	/* Fill output buffer with data */
+	SPI2->DR = data;
+	while (((SPI2)->SR & (SPI_SR_TXE | SPI_SR_RXNE)) == 0 || ((SPI2)->SR & SPI_SR_BSY));
+	PCD8544_SPI->DR;
 	PCD8544_CE_HIGH;
 }
 
@@ -282,7 +322,6 @@ void PCD8544_Pin(PCD8544_Pin_t pin, PCD8544_State_t state) {
 		default: break;
 	}
 }
-
 
 void PCD8544_Delay(unsigned long micros) {
 	volatile unsigned long i;

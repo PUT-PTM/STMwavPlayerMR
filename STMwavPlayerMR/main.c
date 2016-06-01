@@ -578,7 +578,6 @@ int main( void )
 	if(fresult != FR_OK) //jesli wystapil blad tj. wlaczenie STM32 bez karty w module, zle podpiete kable
 	{
 		error_state=1;
-
 		PCD8544_GotoXY(21, 13);
 		PCD8544_Puts("Problem", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
 		PCD8544_GotoXY(17, 21);
