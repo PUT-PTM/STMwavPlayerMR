@@ -19,7 +19,7 @@
 
 FATFS fatfs;
 FIL file;
-u16 sample_buffer[512];
+u16 sample_buffer[2048];
 volatile s8 num_of_switch=-1;
 volatile u16 result_of_conversion=0;
 volatile u8 diode_state=0;
@@ -27,6 +27,8 @@ volatile s8 change_song=0;
 volatile u8 error_state=0;
 volatile bool random_mode=0;
 bool pause=0;
+char song_time[5]={'0', '0', ':', '0', '0'};
+bool half_second=0;
 
 void EXTI0_IRQHandler(void)
 {
@@ -72,6 +74,37 @@ void TIM3_IRQHandler(void)
 {
 	if(TIM_GetITStatus(TIM3, TIM_IT_Update) != RESET)
 	{
+		if(half_second==false)
+		{
+			half_second=true;
+		}
+		else
+		{
+			half_second=false;
+		}
+		if(half_second==0)
+		{
+			song_time[4]++;
+			if(song_time[4]==':')
+			{
+				song_time[3]++;
+				song_time[4]='0';
+			}
+			if(song_time[3]=='6')
+			{
+				song_time[1]++;
+				song_time[3]='0';
+			}
+			if(song_time[1]==':')
+			{
+				song_time[0]++;
+				song_time[1]='0';
+			}
+			if(song_time[0]==':')
+			{
+				song_time[0]='0';
+			}
+		}
 		spin_diodes();
 		// wyzerowanie flagi wyzwolonego przerwania
 		TIM_ClearITPendingBit(TIM3, TIM_IT_Update);
@@ -204,7 +237,7 @@ void DIODES_INTERRUPT()
 	NVIC_Init(&NVIC_InitStructure);// zapisz wypelniona strukture do rejestrow
 
 	TIM_TimeBaseInitTypeDef TIMER_3;
-	TIMER_3.TIM_Period = 42000-1;// okres zliczania nie przekroczyc 2^16!
+	TIMER_3.TIM_Period = 48000-1;// okres zliczania nie przekroczyc 2^16!
 	TIMER_3.TIM_Prescaler = 1000-1;// wartosc preskalera, tutaj bardzo mala
 	TIMER_3.TIM_ClockDivision = TIM_CKD_DIV1;// dzielnik zegara
 	TIMER_3.TIM_CounterMode = TIM_CounterMode_Up;// kierunek zliczania
@@ -339,8 +372,8 @@ void MY_DMA_initM2P()
 	DMA_InitStructure.DMA_Channel = DMA_Channel_0;// wybor kanalu DMA
 	DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;// ustalenie rodzaju transferu (memory2memory / peripheral2memory /memory2peripheral)
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;// tryb pracy - pojedynczy transfer badz powtarzany
-	DMA_InitStructure.DMA_Priority = DMA_Priority_High;// ustalenie priorytetu danego kanalu DMA
-	DMA_InitStructure.DMA_BufferSize = 512;// liczba danych do przeslania
+	DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;// ustalenie priorytetu danego kanalu DMA
+	DMA_InitStructure.DMA_BufferSize = 512*4;// liczba danych do przeslania
 	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&sample_buffer;// adres zrodlowy
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(SPI3->DR));// adres docelowy
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;// zezwolenie na inkrementacje adresu po kazdej przeslanej paczce danych
@@ -438,14 +471,21 @@ bool read_and_send(FRESULT fresult, int position, volatile ITStatus it_status, U
 	{
 		it_status = DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG);
 	}
-	fresult = f_read (&file,&sample_buffer[position],256*2,&read_bytes);
+	fresult = f_read (&file,&sample_buffer[position],1024*2,&read_bytes);
 	DMA_ClearFlag(DMA1_Stream5, DMA_FLAG);
+
+	PCD8544_GotoXY(30, 21);
+	PCD8544_Puts("              ", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_GotoXY(30, 21);
+	PCD8544_Puts(song_time, PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_Refresh();
+
 	if(fresult != FR_OK)// jesli wyjeto karte w trakcie odtwarzania plikow
 	{
 		error_state=2;
 		return 0;
 	}
-	if(read_bytes<256*2||change_song!=0)
+	if(read_bytes<1024*2||change_song!=0)
 	{
 		return 0;
 	}
@@ -461,6 +501,11 @@ void play_wav(struct List *song, FRESULT fresult)
 		fresult=f_lseek(&file,44);// pominiecie 44 B naglowka pliku .wav
 		volatile ITStatus it_status;// sprawdza flage DMA
 		change_song=0;
+		song_time[0]=song_time[1]=song_time[3]=song_time[4]='0';
+		song_time[2]=':';
+		half_second=0;
+		PCD8544_GotoXY(30, 21);
+		PCD8544_Puts(song_time, PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
 		TIM_Cmd(TIM3, ENABLE);
 		while(1)
 		{
@@ -468,7 +513,7 @@ void play_wav(struct List *song, FRESULT fresult)
 			{
 				break;
 			}
-			if (read_and_send(fresult,256, it_status, read_bytes, DMA_FLAG_TCIF5)==0)
+			if (read_and_send(fresult, 1024, it_status, read_bytes, DMA_FLAG_TCIF5)==0)
 			{
 				break;
 			}
@@ -579,15 +624,12 @@ int main( void )
 
 	//Initialize LCD with 0x38 software contrast
 	PCD8544_Init(0x38);
-	//Go to x=14, y=3 position
-	PCD8544_GotoXY(14, 3);
+	//Go to x=1, y=2 position
+	PCD8544_GotoXY(1, 2);
 	//Print data with Pixel Set mode and Fontsize of 5x7px
-	PCD8544_Puts("STM32F407", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
-	PCD8544_GotoXY(15, 13);
-	PCD8544_Puts("Discovery", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
-	PCD8544_GotoXY(30, 26);
+	PCD8544_Puts("STMwavPlayerMR", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_GotoXY(30, 40);
 	PCD8544_Puts("2016", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
-
 	PCD8544_Refresh();
 
 	for(;;)
