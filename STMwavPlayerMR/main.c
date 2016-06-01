@@ -466,8 +466,7 @@ void ADC_init()
 }
 bool read_and_send(FRESULT fresult, int position, volatile ITStatus it_status, UINT read_bytes, uint32_t DMA_FLAG)
 {
-	PCD8544_GotoXY(29, 27);
-	PCD8544_Puts("              ", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_Clear_time();
 	PCD8544_GotoXY(29, 27);
 	PCD8544_Puts(song_time, PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
 	PCD8544_Refresh();
@@ -504,8 +503,7 @@ void play_wav(struct List *song, FRESULT fresult)
 		song_time[0]=song_time[1]=song_time[3]=song_time[4]='0';
 		song_time[2]=':';
 		half_second=0;
-		PCD8544_GotoXY(8, 15);
-		PCD8544_Puts("                  ", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+		display_const();
 		PCD8544_GotoXY(8, 15);
 		PCD8544_Puts(temporary_song->file.fname, PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
 		TIM_Cmd(TIM3, ENABLE);
@@ -523,6 +521,7 @@ void play_wav(struct List *song, FRESULT fresult)
 		diode_state=0;
 		TIM_Cmd(TIM3, DISABLE);
 		fresult = f_close(&file);
+		PCD8544_Clear();
 	}
 }
 bool isWAV(FILINFO fileInfo)
@@ -540,6 +539,16 @@ bool isWAV(FILINFO fileInfo)
 	}
 	return 0;
 }
+void display_const()
+{
+	//Go to x=1, y=2 position
+	PCD8544_GotoXY(1, 2);
+	//Print data with Pixel Set mode and Fontsize of 5x7px
+	PCD8544_Puts("STMwavPlayerMR", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_GotoXY(31, 40);
+	PCD8544_Puts("2016", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_Refresh();
+}
 int main( void )
 {
 	SystemInit();
@@ -553,6 +562,10 @@ int main( void )
 	SysTick_CLKSourceConfig(SysTick_CLKSource_HCLK_Div8);// zegar 24-bitowy
 	SysTick_Config(90000);
 
+	//Initialize LCD with 0x38 software contrast
+	PCD8544_Init(0x38);
+	display_const();
+
 	// SD CARD
 	FRESULT fresult;
 	DIR Dir;
@@ -565,6 +578,14 @@ int main( void )
 	if(fresult != FR_OK) //jesli wystapil blad tj. wlaczenie STM32 bez karty w module, zle podpiete kable
 	{
 		error_state=1;
+
+		PCD8544_GotoXY(21, 13);
+		PCD8544_Puts("Problem", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+		PCD8544_GotoXY(17, 21);
+		PCD8544_Puts("z kablami", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+		PCD8544_GotoXY(17, 29);
+		PCD8544_Puts("lub karta", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+		PCD8544_Refresh();
 		TIM_Cmd(TIM4, ENABLE);
 		for(;;)
 		{ }
@@ -602,6 +623,11 @@ int main( void )
 	if (first==0)// jesli na karcie nie ma plikow .wav
 	{
 		error_state=3;
+		PCD8544_GotoXY(12, 17);
+		PCD8544_Puts("Brak plikow", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+		PCD8544_GotoXY(3, 25);
+		PCD8544_Puts(".wav na karcie", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+		PCD8544_Refresh();
 		TIM_Cmd(TIM4, ENABLE);
 		for(;;)
 		{ }
@@ -623,16 +649,6 @@ int main( void )
 	RNG_Cmd(ENABLE);
 	u32 rand_number=0;
 	u32 i_loop=0;
-
-	//Initialize LCD with 0x38 software contrast
-	PCD8544_Init(0x38);
-	//Go to x=1, y=2 position
-	PCD8544_GotoXY(1, 2);
-	//Print data with Pixel Set mode and Fontsize of 5x7px
-	PCD8544_Puts("STMwavPlayerMR", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
-	PCD8544_GotoXY(32, 40);
-	PCD8544_Puts("2016", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
-	PCD8544_Refresh();
 
 	for(;;)
 	{
@@ -673,7 +689,15 @@ int main( void )
 		}
 	}
 	GPIO_ResetBits(GPIOD, GPIO_Pin_12|GPIO_Pin_13|GPIO_Pin_14|GPIO_Pin_15|CODEC_RESET_PIN);
-	TIM_Cmd(TIM2,DISABLE);
+	display_const();
+	PCD8544_GotoXY(8, 13);
+	PCD8544_Puts("Wyjeto karte", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_GotoXY(34, 21);
+	PCD8544_Puts("lub", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_GotoXY(5, 29);
+	PCD8544_Puts("wypiety kabel", PCD8544_Pixel_Set, PCD8544_FontSize_5x7);
+	PCD8544_Refresh();
+	TIM_Cmd(TIM2, DISABLE);
 	TIM_Cmd(TIM4, ENABLE);
 	for(;;)
 	{ }

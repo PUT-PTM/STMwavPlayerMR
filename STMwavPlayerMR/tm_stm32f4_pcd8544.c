@@ -395,6 +395,18 @@ void PCD8544_Clear(void) {
 	PCD8544_Refresh();
 }
 
+void PCD8544_Clear_time(void) {
+	unsigned int i;
+	PCD8544_Home();
+	for (i = PCD8544_BUFFER_SIZE/2; i < PCD8544_BUFFER_SIZE-100; i++) {
+		PCD8544_Buffer[i] = 0x00;
+		//PCD8544_Write(PCD8544_DATA, 0x00);
+	}
+	PCD8544_GotoXY(29, 27);
+	PCD8544_UpdateArea(29, 27, 68, 35);
+	PCD8544_Refresh();
+}
+
 void PCD8544_Home(void) {
 	PCD8544_Write(PCD8544_COMMAND, PCD8544_SETXADDR | 0);
 	PCD8544_Write(PCD8544_COMMAND, PCD8544_SETYADDR | 0);
