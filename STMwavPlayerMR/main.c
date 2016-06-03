@@ -19,7 +19,7 @@
 
 FATFS fatfs;
 FIL file;
-u16 sample_buffer[2048/2];
+u16 sample_buffer[2048];
 volatile s8 num_of_switch=-1;
 volatile u16 result_of_conversion=0;
 volatile u8 diode_state=0;
@@ -126,10 +126,10 @@ void TIM4_IRQHandler(void)
 		{
 			GPIO_ToggleBits(GPIOD, GPIO_Pin_14);
 		}
-		if (error_state==4)// niezagospodarowane na obecna chwile
+		/*if (error_state==4)// niezagospodarowane na obecna chwile
 		{
 			GPIO_ToggleBits(GPIOD, GPIO_Pin_15);
-		}
+		}*/
 		// wyzerowanie flagi wyzwolonego przerwania
 		TIM_ClearITPendingBit(TIM4, TIM_IT_Update);
 	}
@@ -373,7 +373,7 @@ void MY_DMA_initM2P()
 	DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;// ustalenie rodzaju transferu (memory2memory / peripheral2memory /memory2peripheral)
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;// tryb pracy - pojedynczy transfer badz powtarzany
 	DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;// ustalenie priorytetu danego kanalu DMA
-	DMA_InitStructure.DMA_BufferSize = 512*2;// liczba danych do przeslania
+	DMA_InitStructure.DMA_BufferSize = 2048;// liczba danych do przeslania
 	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)&sample_buffer;// adres zrodlowy
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)(&(SPI3->DR));// adres docelowy
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;// zezwolenie na inkrementacje adresu po kazdej przeslanej paczce danych
@@ -382,7 +382,7 @@ void MY_DMA_initM2P()
 	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_HalfWord;// ustalenie rozmiaru przesylanych danych
 	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;// ustalenie trybu pracy - jednorazwe przeslanie danych
 	DMA_InitStructure.DMA_MemoryBurst = DMA_MemoryBurst_Single;
-	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;// wylaczenie kolejki FIFO (nie uzywana w tym przykadzie
+	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;// wylaczenie kolejki FIFO
 	DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_HalfFull;
 
 	DMA_Init(DMA1_Stream5, &DMA_InitStructure);// zapisanie wypelnionej struktury do rejestrow wybranego polaczenia DMA
@@ -394,7 +394,7 @@ void MY_DMA_initM2P()
 void ADC_conversion()
 {
 	// Odczyt wartosci przez odpytnie flagi zakonczenia konwersji
-	// Wielorazowe sprawdzenie wartoci wyniku konwersji
+	// Wielorazowe sprawdzenie wartosci wyniku konwersji
 	ADC_SoftwareStartConv(ADC1);
 	while(ADC_GetFlagStatus(ADC1, ADC_FLAG_EOC) == RESET);
 	result_of_conversion = ((ADC_GetConversionValue(ADC1))/16);
@@ -476,7 +476,7 @@ bool read_and_send(FRESULT fresult, int position, volatile ITStatus it_status, U
 	{
 		it_status = DMA_GetFlagStatus(DMA1_Stream5, DMA_FLAG);
 	}
-	fresult = f_read (&file,&sample_buffer[position],1024*2/2,&read_bytes);
+	fresult = f_read (&file,&sample_buffer[position],1024*2,&read_bytes);
 	DMA_ClearFlag(DMA1_Stream5, DMA_FLAG);
 
 	if(fresult != FR_OK)// jesli wyjeto karte w trakcie odtwarzania plikow
@@ -484,7 +484,7 @@ bool read_and_send(FRESULT fresult, int position, volatile ITStatus it_status, U
 		error_state=2;
 		return 0;
 	}
-	if(read_bytes<1024*2/2||change_song!=0)
+	if(read_bytes<1024*2||change_song!=0)
 	{
 		return 0;
 	}
@@ -513,7 +513,7 @@ void play_wav(struct List *song, FRESULT fresult)
 			{
 				break;
 			}
-			if (read_and_send(fresult, 1024/2, it_status, read_bytes, DMA_FLAG_TCIF5)==0)
+			if (read_and_send(fresult, 1024, it_status, read_bytes, DMA_FLAG_TCIF5)==0)
 			{
 				break;
 			}
