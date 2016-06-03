@@ -71,7 +71,7 @@
  * - STM32F4xx
  * - STM32F4xx RCC
  * - STM32F4xx GPIO
- * - TM_SPI
+ * - STM32F4xx SPI
  */
 /**
  * Includes
