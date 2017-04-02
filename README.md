@@ -1,21 +1,21 @@
-#STMwavPlayerMR
+# STMwavPlayerMR
 
-##Overview
+## Overview
 The project of simple .wav player based on STM32f4-DISCOVERY board. It plays .wav files from SD card.
 
-##Description
+## Description
 The idea to play .wav files was implement the two-way cyclic list. It contains information about files. You don't need to know the "name" of file, you only need to use one of external switches to switch into next or previous music file or pause/resume playing music. If you use the user button, you switch into random mode of playing .wav files. We use SPI for sending data from SD card to STM32F4 because SD card module doesn't support SDIO communication. It uses DMA module for smoother playback of music. To control the volume of songs we use the potentiometer. We also add Nokia 5110 LCD screen which displays the name of our project, shorten name and current time of playing song. What is more, the simple error handling was implemented. Types of errors are displayed on LCD screen. When you spot blinking:
 * green LED - cable fault, SD Card isn't inserted into SD Card Module or SD Card isn't formatted to FAT32,
 * orange LED - SD Card has been removed during listening music,
 * red LED - SD Card doesn't include .wav files.
 
-##Demo
+## Demo
 https://www.youtube.com/watch?v=0rwHNLLLHSQ
 
-##Tools
+## Tools
 - CooCox CoIDE, Version: 1.7.8
 
-##How to run
+## How to run
 To run the project you should have hardware:
 - STM32f4-DISCOVERY board,
 - SD Card Module and SD Card formatted to FAT32,
@@ -50,10 +50,10 @@ How to use?
 5. Build this project with CooCox CoIDE and Download Code to Flash.
 6. When you notice the fault alarmed by blinking LEDs, you should fix it and press RESET button.
 
-##How to compile
+## How to compile
 The only step is download the project and compile it with CooCox CoIDE.
 
-##Attributions
+## Attributions
 - http://elm-chan.org/fsw/ff/00index_e.html
 - http://www.mind-dump.net/configuring-the-stm32f4-discovery-for-audio
 - http://www1.coocox.org/repo/a8bde334-159f-4dae-bc65-686695a3e545/src/STM3240_41_G_EVAL/stm324xg_audio_codec.h.htm
@@ -61,10 +61,10 @@ The only step is download the project and compile it with CooCox CoIDE.
 - https://www.youtube.com/watch?v=EYs3f4uwYTo
 - http://stm32f4-discovery.net/pcd8544-nokia-33105110-lcd-stm32f429-discovery-library/
 
-##License
+## License
 MIT
 
-##Credits
+## Credits
 * Monika Grądzka
 * Robert Kazimierczak
 
