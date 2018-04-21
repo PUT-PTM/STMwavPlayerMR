@@ -27,26 +27,30 @@ To run the project you should have hardware:
 How to use?
 
 1. Connect STM32F4-DISCOVERY board with SD Card Module in this way:
-  * STM32 <---> SD Card Module
-  * GND  <---> GND
-  * 3V   <---> 3V3
-  * PB11 <---> CS
-  * PB15 <---> MOSI
-  * PB13 <---> SCK
-  * PB14 <---> MISO
-  * GND  <---> GND
+```
+   STM32 <---> SD Card Module
+   GND  <---> GND
+   3V   <---> 3V3
+   PB11 <---> CS
+   PB15 <---> MOSI
+   PB13 <---> SCK
+   PB14 <---> MISO
+   GND  <---> GND
+  ```
 2. Connect also potentiometer (GND, PA1, VDD) and 3 switches (PA5, PA7, PA8).
 3. Plug your SD Card with .wav files into the module.
 4. If you want, you can connect Nokia 3310/5110 LCD screen in this way:
-  * STM32 <---> SD Card Module
-  * GND  <---> GND
-  * GND  <---> BL
-  * 3V   <---> VCC
-  * PB10 <---> CLK
-  * PC3  <---> DIN
-  * PC14 <---> DC
-  * PC13 <---> CE
-  * PC15 <---> RST
+```
+   STM32 <---> SD Card Module
+   GND  <---> GND
+   GND  <---> BL
+   3V   <---> VCC
+   PB10 <---> CLK
+   PC3  <---> DIN
+   PC14 <---> DC
+   PC13 <---> CE
+   PC15 <---> RST
+```
 5. Build this project with CooCox CoIDE and Download Code to Flash.
 6. When you notice the fault alarmed by blinking LEDs, you should fix it and press RESET button.
 
